@@ -27,6 +27,8 @@ regex = "1.10.3"
 smol = "2.0.0"
 
 dotenv = "0.15.0"
+toml = "0.8.8"
+
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 rocket = "0.5.0"
