@@ -92,7 +92,7 @@ impl Coefficient {
 
     /// Divide the coefficient by a value.
     ///
-    /// If the value to divide by is 0.0, the coefficient will be set to 0.0.
+    /// If the value to divide by is 0.0, the coefficient will not be modified.
     ///
     /// # Examples
     /// ```rs
@@ -116,5 +116,105 @@ impl Coefficient {
 impl Default for Coefficient {
     fn default() -> Self {
         Self(1.0)
+    }
+}
+
+#[cfg(test)]
+mod coefficient_test {
+    #[test]
+    fn new() {
+        use super::Coefficient;
+
+        let coefficient = Coefficient::new(1.0);
+        assert_eq!(coefficient.value(), 1.0);
+    }
+
+    #[test]
+    fn set_value() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.set_value(2.0);
+        assert_eq!(coefficient.value(), 2.0);
+    }
+
+    #[test]
+    fn add() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.add(2.0);
+        assert_eq!(coefficient.value(), 3.0);
+    }
+
+    #[test]
+    fn sub() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.sub(0.5);
+        assert_eq!(coefficient.value(), 0.5);
+    }
+
+    #[test]
+    fn sub_zero() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.sub(2.0);
+        assert_eq!(coefficient.value(), 0.0);
+    }
+
+    #[test]
+    fn mul() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.mul(2.0);
+        assert_eq!(coefficient.value(), 2.0);
+    }
+
+    #[test]
+    fn div() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.div(2.0);
+        assert_eq!(coefficient.value(), 0.5);
+    }
+
+    #[test]
+    fn div_zero() {
+        use super::Coefficient;
+
+        let mut coefficient = Coefficient::new(1.0);
+        coefficient.div(0.0);
+        assert_eq!(coefficient.value(), 1.0);
+    }
+
+    #[test]
+    fn default() {
+        use super::Coefficient;
+
+        let coefficient = Coefficient::default();
+        assert_eq!(coefficient.value(), 1.0);
+    }
+
+    #[test]
+    fn partial_eq() {
+        use super::Coefficient;
+
+        let coefficient_1 = Coefficient::new(1.0);
+        let coefficient_2 = Coefficient::new(1.0);
+        assert_eq!(coefficient_1, coefficient_2);
+    }
+
+    #[test]
+    fn partial_ord() {
+        use super::Coefficient;
+
+        let coefficient_1 = Coefficient::new(1.0);
+        let coefficient_2 = Coefficient::new(2.0);
+        assert!(coefficient_1 < coefficient_2);
     }
 }
