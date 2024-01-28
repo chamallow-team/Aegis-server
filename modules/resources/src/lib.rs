@@ -1,5 +1,8 @@
+pub mod coefficient;
+
 use std::fmt::Display;
 
+/// Trait for all resources
 pub trait Resource: Clone + Display + Sized + Sync {}
 
 
@@ -15,7 +18,7 @@ pub trait Resource: Clone + Display + Sized + Sync {}
 /// ```
 #[derive(Clone, Default)]
 pub struct Food {
-    amount: u64,
+    amount: u64
 }
 
 impl Food {
@@ -582,7 +585,7 @@ impl Display for ScientificResearch {
         let mut experts = String::new();
         for expert in &self.experts {
             experts.push_str(&expert.to_string());
-            experts.push_str(" ");
+            experts.push(' ');
         }
         write!(f, "ScientificResearch({})", experts)
     }
