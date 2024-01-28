@@ -1,14 +1,16 @@
 [workspace]
 members = [
-    "components/diplomacy",
-    "components/units",
-    "components/weapons",
     "modules/buildings",
-    "modules/database",
+    "modules/database", "modules/diplomacy",
     "modules/map",
     "modules/market",
     "modules/resources",
     "modules/technology_tree",
+    "modules/units",
+    "modules/weapons",
+    "utils/auth",
+    "utils/logs",
+    "utils/save",
     "server"
 ]
 resolver = "1"
