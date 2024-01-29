@@ -1,23 +1,8 @@
 use crate::Speed;
 
-/// The projectile type is the type of projectile that is used in the missile
+/// The projectile type is the type of trajectory the missile will be using
 #[derive(Clone)]
-pub enum ProjectileType {
-    /// The missile is guided by a human operator
-    Laser,
-    /// The missile is guided by a radar
-    Radar,
-    /// The missile is guided by a heat source
-    Heat,
-    /// The missile is guided by a GPS signal
-    Gps,
-    /// The missile is guided by a radio signal
-    Radio
-}
-
-/// The missile guidance type is the type of guidance that is used in the missile
-#[derive(Clone)]
-pub enum MissileGuidanceType {
+pub enum ProjectileType {   
     /// The missile is guided by a human operator
     ///
     /// The missile is able to change his trajectory after launch and is able to follow a target.
@@ -28,6 +13,21 @@ pub enum MissileGuidanceType {
     /// His trajectory is a parabola, and he can go up to 100 km in altitude.
     /// He can't change his trajectory after launch.
     Ballistic
+}
+
+/// The missile guidance type is the type of guidance that is used in the missile
+#[derive(Clone)]
+pub enum MissileGuidanceType {
+    /// The missile is guided by a human operator
+    Laser,
+    /// The missile is guided by a radar
+    Radar,
+    /// The missile is guided by a heat source
+    Heat,
+    /// The missile is guided by a GPS signal
+    Gps,
+    /// The missile is guided by a radio signal
+    Radio
 }
 
 /// The warhead type is the type of warhead that is used in the missile
