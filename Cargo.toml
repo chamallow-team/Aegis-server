@@ -36,3 +36,8 @@ tracing-subscriber = "0.3.18"
 rocket = "0.5.0"
 
 petgraph = "0.6.4"
+
+
+# Server
+rust-embed = "8.2.0"
+clap = "4.4.18"
