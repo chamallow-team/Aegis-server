@@ -6,11 +6,6 @@ The code is located [here](/server/src/)
   - [communications](#communications)
     - [flow](#communication-flow)
     - [protocols](#communication-protocols)
-      - [CSP](#client-server-protocol-csp)
-        - [header](#csp-header)
-        - [Data]()
-      - [SGP](#server-game-protocol-sgp)
-
 ## Definitions
   - `Server` refer to the Server HUB that manage `Games`, `Clients` and communications
   - `Game` refer to a game instance that handle the game logic (players, units, tchat...)
@@ -26,8 +21,5 @@ FIXME : MASTER and SLAVES servers for load balancing huge servers hub
 
 ## communication protocols
 All communications are made trough custom protocoles over TCP/UDP or thread-channels.
-
----
-
----
-### Server-Game Protocol (SGP)
+- [Client-Server Protocol](./protocols/CSP.md)
+- [Server-Game Protocol](./protocols/SGP.md)
