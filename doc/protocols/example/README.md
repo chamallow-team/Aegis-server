@@ -1,6 +1,8 @@
-# CSP / SGP examples
-This directorie contains an example of the communication flow and protocols used by aegis.
+# CSP example
+This directory contains an example of the CSP protocols used by aegis.
 
-They serves as a reference on how to implement this flow and protocols.
+It serves as a reference on how to implement this protocol.
 
-To *start* the example you need [luvit](https://luvit.io) as a lua runtime and launch [start.lua](./start.lua)
+To *start* the example you need [luvit](https://luvit.io) as a lua runtime. This is an implementation of the CSP protocol on a tchat server with clients
+
+This server-client example requires you to start the [server](./server.lua) first, then start on another terminal a [client](./client.lua). you can start as many client as you wish at the same time! fell free to test how you want

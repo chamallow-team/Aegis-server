@@ -6,12 +6,13 @@
 - [Data](#data)
 - [Examples](#examples)
 - [Flow](#flow)
+- [Rules](#rules)
 
 *all bytes represented in the following documentation are decimals*
 
 
 ## Usage 
-This protocol is used for communication between the Server and the Client ([see definitions](../Server.md#definitions)).
+This protocol is used for communication between the Server the Client and the Game ([see definitions](../Server.md#definitions)).
 
 The CSP follows a header-data message format, with reduced informations. Each message is called a `packet`.
 
@@ -29,7 +30,7 @@ the header use a key-value pair with optimisation in mind:
   - a value is defined depending of the associated key:
     - **None**: if the key does not need a value
     - **single byte value**: an enum value between 32 and 255
-    - **4 bytes number**: a positive number represented as an ascii hex. eg: `48 97 102 50` == 0af2 (2802)
+    - **4 bytes number**: an unsigned number stored as *little endian* (see the [csp example parser](./example/csp.lua) if need hints on how it works)
     - **8 byte number**: same as 4 byte number with more bytes for larger numbers
     - **string**: a way to pass unknown length value, it starts with `string_start` control and ends with `string_end` control.<br>
     everything contained between the controls bytes must be valid utf8/ascii values
@@ -52,6 +53,7 @@ name|value
 [VERSION](./headers/version.md) | 36
 [UPDATE](./headers/update.md) | 37
 [ID](./headers/id.md) | 38
+[RECONNECT](./headers/reconnect.md) | 39
 
 ## Data
  TODO : define data
@@ -89,10 +91,22 @@ where we have added `35 03 [...] 04`:
 
  TODO : define more CSP examples
 
+You can read a basic example [here](./example/)
+
 ## Flow
 This is an example of a basic connection between a Client and a Server, displaying the methods used
 
-![csp methods flow](../assets/csp.drawio.svg)
+![csp client-server flow](../assets/csp-client-server.drawio.svg)
+
+This is an example of a basic connection between a Server and a Game, displaying the methods used
+
+![csp server-game flow](../assets/csp-server-game.drawio.svg)
+
+This is the differences between a server-client CSP packet and server-game CSP packet
+![csp vs sgp](../assets/csp-differences.drawio.svg)
 
 
-You can read a basic example [here](./example/)
+## Rules
+  - each *header* can only be set once by packet
+  - an unknown value is concidered as corrupted packet
+  - if some [data] is present, [`length`](./headers/length.md) method should be present

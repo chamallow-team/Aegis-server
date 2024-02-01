@@ -1,5 +1,5 @@
 [[back]](../CSP.md#header-keys)
-# Methods
+# Version
 Define the client's version for the server compatibility
 
 **Key**: `36`
