@@ -1,4 +1,5 @@
 # Client-Server Protocol (CSP)
+- [Usage](#usage)
 - [Header](#header)
   - [Control characters](#control-characters)
   - [keys](#header-keys)
@@ -8,15 +9,19 @@
 
 *all bytes represented in the following documentation are decimals*
 
+
+## Usage 
+This protocol is used for communication between the Server and the Client ([see definitions](../Server.md#definitions)).
+
 The CSP follows a header-data message format, with reduced informations. Each message is called a `packet`.
 
 The separation between header/data is made with [control char](#control-characters):
 ```
 [header] 1 2 [data]
 ```
-it's mandatory to mark the end of an header otherwises it's concidered as a corrupted packet
+it's mandatory to mark the end of an header otherwises it's concidered as a corrupted packet.
 
-if no start of data control is found, it means that no data has been sent with the packet
+if no start of data control is found, it means that no data has been sent with the packet.
 
 ## header
 the header use a key-value pair with optimisation in mind:
@@ -46,15 +51,16 @@ name|value
 [IDENTITY](./headers/identity) | 35
 [VERSION](./headers/version.md) | 36
 [UPDATE](./headers/update.md) | 37
+[ID](./headers/id.md) | 38
 
 ## Data
  TODO : define data
 
 ## Examples
-All examples use a raw byte-separates format using decimak values
+All examples use a raw byte-separates format using decimal values
 
 ### CONNECT packet
-A connect packet whould look like this: 
+A connect packet would look like this: 
 ```
 32 32 33 48 48 48 49 01
 ```
@@ -81,7 +87,12 @@ where we have added `35 03 [...] 04`:
 - `[...]` : identity string
 - `04` : string_end
 
+ TODO : define more CSP examples
+
 ## Flow
 This is an example of a basic connection between a Client and a Server, displaying the methods used
 
 ![csp methods flow](../assets/csp.drawio.svg)
+
+
+You can read a basic example [here](./example/)

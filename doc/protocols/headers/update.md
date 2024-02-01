@@ -2,7 +2,7 @@
 # Methods
 If the Client needs an update about the overrided config/assets or mods
 
-The server will transmit them in the following STATE [method](./method.md)
+The server will transmit them in the following [`sate`](./method.md#state) method
 
 **Key**: `37`
 
