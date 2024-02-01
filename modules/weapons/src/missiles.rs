@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use crate::{Speed, WeaponInformations};
+use crate::{Damages, Speed, WeaponInformations};
 
 /// The projectile type is the type of trajectory the missile will be using
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
@@ -16,6 +16,18 @@ pub enum ProjectileType {
     Ballistic = 1
 }
 
+impl TryFrom<i64> for ProjectileType {
+    type Error = ();
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(ProjectileType::Cruiser),
+            1 => Ok(ProjectileType::Ballistic),
+            _ => Err(())
+        }
+    }
+}
+
 /// The missile guidance type is the type of guidance that is used in the missile
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub enum MissileGuidanceType {
@@ -29,6 +41,21 @@ pub enum MissileGuidanceType {
     Gps = 3,
     /// The missile is guided by a radio signal
     Radio = 4
+}
+
+impl TryFrom<i64> for MissileGuidanceType {
+    type Error = ();
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(MissileGuidanceType::Laser),
+            1 => Ok(MissileGuidanceType::Radar),
+            2 => Ok(MissileGuidanceType::Heat),
+            3 => Ok(MissileGuidanceType::Gps),
+            4 => Ok(MissileGuidanceType::Radio),
+            _ => Err(())
+        }
+    }
 }
 
 /// The warhead type is the type of warhead that is used in the missile
@@ -55,6 +82,24 @@ pub enum WarheadType {
     Emp = 7
 }
 
+impl TryFrom<i64> for WarheadType {
+    type Error = ();
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(WarheadType::Cruiser),
+            1 => Ok(WarheadType::AntiShip),
+            2 => Ok(WarheadType::AntiAircraft),
+            3 => Ok(WarheadType::Abm),
+            4 => Ok(WarheadType::Srbm),
+            5 => Ok(WarheadType::Mrbm),
+            6 => Ok(WarheadType::Icbm),
+            7 => Ok(WarheadType::Emp),
+            _ => Err(())
+        }
+    }
+}
+
 /// The warhead charge is the type of explosive charge that is used in the warhead
 #[derive(Clone, Default, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub enum WarheadCharge {
@@ -69,6 +114,20 @@ pub enum WarheadCharge {
     Biological = 3
 }
 
+impl TryFrom<i64> for WarheadCharge {
+    type Error = ();
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(WarheadCharge::Standard),
+            1 => Ok(WarheadCharge::Chemical),
+            2 => Ok(WarheadCharge::Nuclear),
+            3 => Ok(WarheadCharge::Biological),
+            _ => Err(())
+        }
+    }
+}
+
 /// The warhead count is the number of warhead that is used in the missile
 pub type WarheadCount = u32;
 
@@ -77,14 +136,12 @@ pub type WarheadCount = u32;
 /// This instance can be used in two ways:
 /// - Represent a missile that is fired by a unit
 /// - Represent a missile for its information, such as in the research tree
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Missile {
     /// The guidance type of the missile
     guidance: MissileGuidanceType,
     /// The type of projectile that is used in the missile
     projectile: ProjectileType,
-    /// The speed of the missile
-    speed: Speed,
     /// If the missile is hypersonic, it means that he is able to go faster than Mach 5 and can
     /// dodge anti-missile systems more easily
     hypersonic: bool,
@@ -100,11 +157,12 @@ pub struct Missile {
     position: MissileCoordinate,
 
     /// The information about the missile
-    informations: WeaponInformations
+    informations: WeaponInformations,
+    damages: Damages
 }
 
 /// Default speed of a missile in meters per second
-const DEFAULT_SPEED: Speed = 1000.0;
+pub const DEFAULT_SPEED: Speed = 0.0;
 
 impl Missile {
     /// Create a new missile
@@ -122,7 +180,6 @@ impl Missile {
     pub fn new(guidance: MissileGuidanceType, projectile: ProjectileType) -> Self {
         Self {
             guidance, projectile,
-            speed: DEFAULT_SPEED,
             hypersonic: false,
             warhead: WarheadType::Cruiser,
             warhead_charge: WarheadCharge::Standard,
@@ -132,7 +189,8 @@ impl Missile {
                 to: (0.0, 0.0),
                 progress: 0.0
             },
-            informations: WeaponInformations::default()
+            informations: WeaponInformations::default(),
+            damages: Damages::default()
         }
     }
 
@@ -197,7 +255,7 @@ impl Missile {
     /// assert_eq!(missile.get_speed(), 1000.0);
     /// ```
     pub fn get_speed(&self) -> Speed {
-        self.speed
+        self.informations.speed
     }
 
     /// Set the speed of the missile
@@ -211,7 +269,7 @@ impl Missile {
     /// assert_eq!(missile.get_speed(), 2000.0);
     /// ```
     pub fn set_speed(&mut self, speed: Speed) {
-        self.speed = speed;
+        self.informations.speed = speed;
     }
 
     /// Return a boolean that indicates if the missile is hypersonic
@@ -408,9 +466,25 @@ impl Missile {
     pub fn set_informations(&mut self, informations: WeaponInformations) {
         self.informations = informations;
     }
+
+    /// Get the damages of the missile
+    pub fn get_damages(&self) -> &Damages {
+        &self.damages
+    }
+
+    /// Get the mutable damages of the missile
+    pub fn get_damages_mut(&mut self) -> &mut Damages {
+        &mut self.damages
+    }
+
+    /// Set the damages of the missile
+    pub fn set_damages(&mut self, damages: Damages) {
+        self.damages = damages;
+    }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[allow(unused)] // TODO remove this ugly hack
 pub struct MissileCoordinate {
     from: (f32, f32),
     to: (f32, f32),
@@ -529,17 +603,14 @@ mod test {
         missile.set_informations(WeaponInformations {
             name: "Exocet".to_string(),
             caliber: 0.0,
-            damages: Default::default(),
             speed: 315.0,
             range: 180.0,
-            fire_rate: 1.0
+            country_reference: "FR".to_string()
         });
         assert_eq!(missile.get_informations().name, "Exocet".to_string());
         assert_eq!(missile.get_informations().caliber, 0.0);
-        assert_eq!(missile.get_informations().damages, Default::default());
         assert_eq!(missile.get_informations().speed, 315.0);
         assert_eq!(missile.get_informations().range, 180.0);
-        assert_eq!(missile.get_informations().fire_rate, 1.0);
     }
 
     #[test]
@@ -570,5 +641,147 @@ mod test {
         assert_eq!(missile.get_position().progress, 0.0);
         missile.get_position_mut().progress = 0.5;
         assert_eq!(missile.get_position().progress, 0.5);
+    }
+
+    #[test]
+    fn test_damages() {
+        use super::*;
+
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        assert_eq!(missile.get_damages().building, 0.0);
+        assert_eq!(missile.get_damages().infantry, 0.0);
+        assert_eq!(missile.get_damages().vehicle, 0.0);
+        assert_eq!(missile.get_damages().armored_vehicle, 0.0);
+        assert_eq!(missile.get_damages().tank, 0.0);
+        assert_eq!(missile.get_damages().helicopter, 0.0);
+        assert_eq!(missile.get_damages().plane, 0.0);
+        assert_eq!(missile.get_damages().ship, 0.0);
+        assert_eq!(missile.get_damages().submarine, 0.0);
+        assert_eq!(missile.get_damages().missile, 0.0);
+        assert_eq!(missile.get_damages().satellite, 0.0);
+
+        missile.set_damages(Damages {
+            building: 1.0,
+            infantry: 2.0,
+            vehicle: 3.0,
+            armored_vehicle: 4.0,
+            tank: 5.0,
+            helicopter: 6.0,
+            plane: 7.0,
+            ship: 8.0,
+            submarine: 9.0,
+            missile: 10.0,
+            satellite: 11.0
+        });
+
+        assert_eq!(missile.get_damages().building, 1.0);
+        assert_eq!(missile.get_damages().infantry, 2.0);
+        assert_eq!(missile.get_damages().vehicle, 3.0);
+        assert_eq!(missile.get_damages().armored_vehicle, 4.0);
+        assert_eq!(missile.get_damages().tank, 5.0);
+        assert_eq!(missile.get_damages().helicopter, 6.0);
+        assert_eq!(missile.get_damages().plane, 7.0);
+        assert_eq!(missile.get_damages().ship, 8.0);
+        assert_eq!(missile.get_damages().submarine, 9.0);
+        assert_eq!(missile.get_damages().missile, 10.0);
+        assert_eq!(missile.get_damages().satellite, 11.0);
+    }
+}
+
+#[cfg(feature = "load_configuration")]
+pub(crate) mod loader {
+    use std::{fs, io};
+    use std::path::PathBuf;
+    use toml::{Table, Value};
+    use crate::loader::{parse_damages, parse_weapons_information, WeaponsStore};
+    use crate::missiles::{Missile, MissileGuidanceType, ProjectileType, WarheadCharge, WarheadType};
+
+    pub(crate) fn read_missiles(dir: PathBuf, store: &mut WeaponsStore) -> io::Result<()> {
+        let content = fs::read_to_string(&dir)?;
+
+        let table = match toml::from_str::<Table>(content.as_str()) {
+            Ok(table) => table,
+            Err(e) => {
+                // TODO use a proper logging method
+                println!("\x1b[33mWarning: cannot parse the toml content at {dir:?}: {e:?}\x1b[0m");
+                return Ok(())
+            }
+        };
+
+        for (k, v) in table.iter() {
+            if !v.is_table() {
+                // TODO use a proper logging method
+                println!("\x1b[33mWarning: the value of the key {k:?} at {dir:?} is not a table\x1b[0m");
+                continue;
+            }
+
+            if let Some(m) = parse_missile(&dir, v.as_table().unwrap()) {
+                store.missiles.insert(k.into(), m);
+            }
+        }
+
+        Ok(())
+    }
+
+    const UNWANTED_KEYS: &[&str] = &["guidance", "projectile", "hypersonic", "warhead", "warhead_charge", "warhead_count"];
+
+    fn parse_missile(dir: &PathBuf, t: &Table) -> Option<Missile> {
+        let guidance = MissileGuidanceType::try_from(
+            get_type(t, "guidance", dir)?.as_integer()?
+        ).ok()?;
+        let projectile = ProjectileType::try_from(
+            get_type(t, "projectile", dir)?.as_integer()?
+        ).ok()?;
+        let hypersonic = get_type(t, "hypersonic", dir)?.as_bool()?;
+        let warhead = WarheadType::try_from(
+            get_type(t, "warhead", dir)?.as_integer()?
+        ).ok()?;
+        let warhead_charge = WarheadCharge::try_from(
+            get_type(t, "warhead_charge", dir)?.as_integer()?
+        ).ok()?;
+        let warhead_count = get_type(t, "warhead_count", dir)?.as_integer()? as u32;
+
+        let mut missile = Missile::new(guidance, projectile);
+        missile.set_hypersonic(hypersonic);
+        missile.set_warhead_type(warhead);
+        missile.set_warhead_charge(warhead_charge);
+        missile.set_warhead_count(warhead_count);
+
+        for (k, v) in t.iter().filter(|(k, _)| !UNWANTED_KEYS.contains(&k.to_lowercase().as_str())) {
+            match k.as_str() {
+                "informations" => match parse_weapons_information(v) {
+                    Ok(t) => missile.set_informations(t),
+                    Err(e) => {
+                        // TODO use a proper logging method
+                        println!("\x1b[33mWarning: cannot parse the informations of the missile at {dir:?}: {e:?}\x1b[0m");
+                        return None;
+                    }
+                },
+                "damages" => match parse_damages(v) {
+                    Ok(d) => missile.set_damages(d),
+                    Err(e) => {
+                        // TODO use a proper logging method
+                        println!("\x1b[33mWarning: cannot parse the damages of the missile at {dir:?}: {e:?}\x1b[0m");
+                        return None;
+                    }
+                },
+                _ => {
+                    // TODO use a proper logging method
+                    println!("\x1b[33mWarning: the key {k:?} of the missile at {dir:?} is unknown\x1b[0m");
+                    continue;
+                }
+            }
+        }
+
+        Some(missile)
+    }
+
+    fn get_type<'a>(t: &'a Table, k: &str, dir: &PathBuf) -> Option<&'a Value> {
+        if !t.contains_key(k) {
+            // TODO use a proper logging method
+            println!("\x1b[33mWarning: the missile at {dir:?} does not have a key for {k:?}\x1b[0m");
+            return None;
+        }
+        Some(t.get(k).unwrap())
     }
 }

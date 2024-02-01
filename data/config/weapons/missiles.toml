@@ -1,0 +1,25 @@
+[m51]
+guidance = 3 # GPS
+projectile = 1 # Balistic
+hypersonic = false
+warhead = 6 # Icbm
+warhead_charge = 2 # Nuclear
+warhead_count = 10
+
+[m51.informations]
+name = "M51"
+speed = 5145 # Mach 15 :]
+range = 10_000 # 10k Km, c'est classifié
+country_reference = "fr"
+
+[m51.damages]
+building = 100
+infantry = 90
+vehicle = 90
+armored_vehicle = 90
+tank = 90
+helicopter = 75
+plane = 110
+ship = 50
+submarine = 10
+missile = 1000
