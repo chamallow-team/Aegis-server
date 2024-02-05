@@ -257,8 +257,6 @@ mod test {
         let store = crate::loader::load(p).unwrap();
 
         dbg!(store);
-
-        todo!()
     }
 }
 
