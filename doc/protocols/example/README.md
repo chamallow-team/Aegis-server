@@ -1,8 +1,33 @@
 # CSP example
-This directory contains an example of the CSP protocols used by aegis.
+This directory contains an example of a [csp parser](./csp.lua) written in lua.
 
-It serves as a reference on how to implement this protocol.
+It currently use [luvit](https://luvit.io) as a lua runtime. *To adapt it to other runtimes, modify the bit library to use bit3é (lua <= 5.2) or bitwise operators (lua > 5.2)* (search for "---FIXME")
 
-To *start* the example you need [luvit](https://luvit.io) as a lua runtime. This is an implementation of the CSP protocol on a tchat server with clients
+```lua
+local csp = require"./csp"
+local bind = require"utils".bind
+local client = require"net".connect("8080", "127.0.0.1")
 
-This server-client example requires you to start the [server](./server.lua) first, then start on another terminal a [client](./client.lua). you can start as many client as you wish at the same time! fell free to test how you want
+client:once("connect", function()
+  local packet = csp.Packet("connect", {version = "0.0.1"}, nil, bind(client.write, client))
+  packet:send()
+end)
+
+client:on("data", function(chunk)
+  
+  while #chunk > 0 do
+    local packet, err = csp.parse(chunk)
+    if err then 
+      csp.Packet("disconnect", {}, "corrupted packet", bind(client.write, client)):send()
+      client:shutdown()
+      break
+    end
+
+    log_csp(packet.buffer, packet)
+    chunk = err
+  end
+  
+end)
+```
+
+More examples may come in the future..
