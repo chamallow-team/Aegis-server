@@ -8,7 +8,7 @@ pub enum ProjectileType {
     ///
     /// The missile is able to change his trajectory after launch and is able to follow a target.
     /// He uses a cruise trajectory with a low altitude.
-    Cruiser = 0,
+    Cruise = 0,
     /// The missile is guided by a radar
     ///
     /// His trajectory is a parabola, and he can go up to 100 km in altitude.
@@ -21,7 +21,7 @@ impl TryFrom<i64> for ProjectileType {
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(ProjectileType::Cruiser),
+            0 => Ok(ProjectileType::Cruise),
             1 => Ok(ProjectileType::Ballistic),
             _ => Err(())
         }
@@ -62,7 +62,7 @@ impl TryFrom<i64> for MissileGuidanceType {
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub enum WarheadType {
     /// Cruise missile
-    Cruiser = 0,
+    Cruise = 0,
     /// Anti-ship missile
     AntiShip = 1,
     /// Anti-aircraft missile
@@ -87,7 +87,7 @@ impl TryFrom<i64> for WarheadType {
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(WarheadType::Cruiser),
+            0 => Ok(WarheadType::Cruise),
             1 => Ok(WarheadType::AntiShip),
             2 => Ok(WarheadType::AntiAircraft),
             3 => Ok(WarheadType::Abm),
@@ -175,13 +175,13 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// ```
     pub fn new(guidance: MissileGuidanceType, projectile: ProjectileType) -> Self {
         Self {
             guidance, projectile,
             hypersonic: false,
-            warhead: WarheadType::Cruiser,
+            warhead: WarheadType::Cruise,
             warhead_charge: WarheadCharge::Standard,
             warhead_count: 1,
             position: MissileCoordinate {
@@ -199,7 +199,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_missile_type(), MissileGuidanceType::Laser);
     /// ```
     pub fn get_missile_type(&self) -> MissileGuidanceType {
@@ -211,7 +211,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_missile_type(), MissileGuidanceType::Laser);
     /// missile.set_missile_type(MissileGuidanceType::Heat);
     /// assert_eq!(missile.get_missile_type(), MissileGuidanceType::Heat);
@@ -225,8 +225,8 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
-    /// assert_eq!(missile.get_projectile_type(), ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
+    /// assert_eq!(missile.get_projectile_type(), ProjectileType::Cruise);
     /// ```
     pub fn get_projectile_type(&self) -> ProjectileType {
         self.projectile
@@ -237,8 +237,8 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
-    /// assert_eq!(missile.get_projectile_type(), ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
+    /// assert_eq!(missile.get_projectile_type(), ProjectileType::Cruise);
     /// missile.set_projectile_type(ProjectileType::Ballistic);
     /// assert_eq!(missile.get_projectile_type(), ProjectileType::Ballistic);
     /// ```
@@ -251,7 +251,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_speed(), 1000.0);
     /// ```
     pub fn get_speed(&self) -> Speed {
@@ -263,7 +263,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_speed(), 1000.0);
     /// missile.set_speed(2000.0);
     /// assert_eq!(missile.get_speed(), 2000.0);
@@ -277,7 +277,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert!(!missile.is_hypersonic());
     /// ```
     pub fn is_hypersonic(&self) -> bool {
@@ -289,7 +289,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert!(!missile.is_hypersonic());
     /// missile.set_hypersonic(true);
     /// assert!(missile.is_hypersonic());
@@ -303,8 +303,8 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
-    /// assert_eq!(missile.get_warhead_type(), WarheadType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
+    /// assert_eq!(missile.get_warhead_type(), WarheadType::Cruise);
     /// ```
     pub fn get_warhead_type(&self) -> WarheadType {
         self.warhead
@@ -315,8 +315,8 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
-    /// assert_eq!(missile.get_warhead_type(), WarheadType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
+    /// assert_eq!(missile.get_warhead_type(), WarheadType::Cruise);
     /// missile.set_warhead_type(WarheadType::AntiShip);
     /// assert_eq!(missile.get_warhead_type(), WarheadType::AntiShip);
     /// ```
@@ -329,7 +329,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_warhead_charge(), WarheadCharge::Standard);
     /// ```
     pub fn get_warhead_charge(&self) -> WarheadCharge {
@@ -341,7 +341,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_warhead_charge(), WarheadCharge::Standard);
     /// missile.set_warhead_charge(WarheadCharge::Chemical);
     /// assert_eq!(missile.get_warhead_charge(), WarheadCharge::Chemical);
@@ -355,7 +355,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_warhead_count(), 1);
     /// ```
     pub fn get_warhead_count(&self) -> WarheadCount {
@@ -367,7 +367,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_warhead_count(), 1);
     /// missile.set_warhead_count(2);
     /// assert_eq!(missile.get_warhead_count(), 2);
@@ -381,7 +381,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_position().from, (0.0, 0.0));
     /// ```
     pub fn get_position(&self) -> &MissileCoordinate {
@@ -393,7 +393,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_position().from, (0.0, 0.0));
     /// missile.get_position_mut().from = (1.0, 1.0);
     pub fn get_position_mut(&mut self) -> &mut MissileCoordinate {
@@ -405,7 +405,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_position().from, (0.0, 0.0));
     /// missile.set_position(MissileCoordinate {
     ///    from: (1.0, 1.0),
@@ -425,7 +425,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_informations().name, String::new());
     /// ```
     pub fn get_informations(&self) -> &WeaponInformations {
@@ -437,7 +437,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_informations().name, String::new());
     /// missile.get_informations_mut().name = "Exocet".to_string();
     /// assert_eq!(missile.get_informations().name, "Exocet".to_string());
@@ -451,7 +451,7 @@ impl Missile {
     /// # Example
     ///
     /// ```rs
-    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+    /// let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
     /// assert_eq!(missile.get_informations().name, String::new());
     /// missile.set_informations(WeaponInformations {
     ///    name: "Exocet".to_string(),
@@ -497,12 +497,12 @@ mod test {
     fn test_default_missile() {
         use super::*;
 
-        let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_missile_type(), MissileGuidanceType::Laser);
-        assert_eq!(missile.get_projectile_type(), ProjectileType::Cruiser);
+        assert_eq!(missile.get_projectile_type(), ProjectileType::Cruise);
         assert_eq!(missile.get_speed(), DEFAULT_SPEED);
         assert!(!missile.is_hypersonic());
-        assert_eq!(missile.get_warhead_type(), WarheadType::Cruiser);
+        assert_eq!(missile.get_warhead_type(), WarheadType::Cruise);
         assert_eq!(missile.get_warhead_charge(), WarheadCharge::Standard);
         assert_eq!(missile.get_warhead_count(), 1);
         assert_eq!(missile.get_position().from, (0.0, 0.0));
@@ -512,7 +512,7 @@ mod test {
     fn test_missile_type() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_missile_type(), MissileGuidanceType::Laser);
         missile.set_missile_type(MissileGuidanceType::Heat);
         assert_eq!(missile.get_missile_type(), MissileGuidanceType::Heat);
@@ -522,8 +522,8 @@ mod test {
     fn test_projectile_type() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
-        assert_eq!(missile.get_projectile_type(), ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
+        assert_eq!(missile.get_projectile_type(), ProjectileType::Cruise);
         missile.set_projectile_type(ProjectileType::Ballistic);
         assert_eq!(missile.get_projectile_type(), ProjectileType::Ballistic);
     }
@@ -532,7 +532,7 @@ mod test {
     fn test_speed() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_speed(), DEFAULT_SPEED);
         missile.set_speed(2000.0);
         assert_eq!(missile.get_speed(), 2000.0);
@@ -542,7 +542,7 @@ mod test {
     fn test_hypersonic() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert!(!missile.is_hypersonic());
         missile.set_hypersonic(true);
         assert!(missile.is_hypersonic());
@@ -552,8 +552,8 @@ mod test {
     fn test_warhead_type() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
-        assert_eq!(missile.get_warhead_type(), WarheadType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
+        assert_eq!(missile.get_warhead_type(), WarheadType::Cruise);
         missile.set_warhead_type(WarheadType::AntiShip);
         assert_eq!(missile.get_warhead_type(), WarheadType::AntiShip);
     }
@@ -562,7 +562,7 @@ mod test {
     fn test_warhead_charge() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_warhead_charge(), WarheadCharge::Standard);
         missile.set_warhead_charge(WarheadCharge::Chemical);
         assert_eq!(missile.get_warhead_charge(), WarheadCharge::Chemical);
@@ -572,7 +572,7 @@ mod test {
     fn test_warhead_count() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_warhead_count(), 1);
         missile.set_warhead_count(2);
         assert_eq!(missile.get_warhead_count(), 2);
@@ -582,7 +582,7 @@ mod test {
     fn test_position() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_position().from, (0.0, 0.0));
         missile.set_position(MissileCoordinate {
             from: (1.0, 1.0),
@@ -598,7 +598,7 @@ mod test {
     fn test_informations() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_informations().name, String::new());
         missile.set_informations(WeaponInformations {
             name: "Exocet".to_string(),
@@ -617,7 +617,7 @@ mod test {
     fn test_missile_coordinate() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_position().from, (0.0, 0.0));
         missile.get_position_mut().from = (1.0, 1.0);
         assert_eq!(missile.get_position().from, (1.0, 1.0));
@@ -627,7 +627,7 @@ mod test {
     fn test_missile_coordinate_to() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_position().to, (0.0, 0.0));
         missile.get_position_mut().to = (1.0, 1.0);
         assert_eq!(missile.get_position().to, (1.0, 1.0));
@@ -637,7 +637,7 @@ mod test {
     fn test_missile_coordinate_progress() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_position().progress, 0.0);
         missile.get_position_mut().progress = 0.5;
         assert_eq!(missile.get_position().progress, 0.5);
@@ -647,7 +647,7 @@ mod test {
     fn test_damages() {
         use super::*;
 
-        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruiser);
+        let mut missile = Missile::new(MissileGuidanceType::Laser, ProjectileType::Cruise);
         assert_eq!(missile.get_damages().building, 0.0);
         assert_eq!(missile.get_damages().infantry, 0.0);
         assert_eq!(missile.get_damages().vehicle, 0.0);
