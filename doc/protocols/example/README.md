@@ -9,7 +9,7 @@ local bind = require"utils".bind
 local client = require"net".connect("8080", "127.0.0.1")
 
 client:once("connect", function()
-  local packet = csp.Packet("connect", {version = "0.0.1"}, nil, bind(client.write, client))
+  local packet = csp.Packet("connect", {version = "0.0.1", csp = "1.0"}, nil, bind(client.write, client))
   packet:send()
 end)
 

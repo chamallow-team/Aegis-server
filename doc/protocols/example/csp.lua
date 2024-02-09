@@ -30,7 +30,7 @@ local parser_parse, parser_stringify
 local err_id = {
   duplicate_header = "DUP_HEADER",
   unknown_header = "UKWN_HEADER",
-  unknown_method = "UKWN_METHOD",
+  unknown_header_value = "UKWN_HEADER_VAL",
   unknown_control = "UKWN_CTRL",
   missing_control = "MISS_CTRL",
   unexpected_control = "UNXPT_CTRL",
@@ -44,7 +44,7 @@ local err_id = {
 local err_msg = {
   [err_id.duplicate_header] = "Duplicated header: %s.",
   [err_id.unknown_header] = "Unknown header: %02d.",
-  [err_id.unknown_method] = "Unknown method: %02d.",
+  [err_id.unknown_header_value] = "Unknown value for [%s]: %02d.",
   [err_id.unknown_control] = "Unknown control: %02d.",
   [err_id.missing_control] = "Missing control: %s.",
   [err_id.unexpected_control] = "Unexpected control: %s.",
@@ -73,6 +73,7 @@ local headers = {
   update = 37,
   id = 38,
   reconnect = 39,
+  csp = 40,
 }
 
 -- see /doc/protocols/headers/method.md
@@ -88,11 +89,26 @@ local methods = {
   state = 39
 }
 
+-- see /doc/protocols/headers/csp.md
+local versions = {
+  ["1.0"] = 32
+}
+
 ---return the name of the method given their byte representation
 ---@param id number
 ---@return string method
 local function get_method(id)
   for k, v in pairs(methods) do
+    if v == id then return k:lower() end
+  end
+  return ""
+end
+
+---return the name of the method given their byte representation
+---@param id number
+---@return string method
+local function get_version(id)
+  for k, v in pairs(versions) do
     if v == id then return k:lower() end
   end
   return ""
@@ -536,7 +552,7 @@ local parser_match = switch({
 
     packet.method = get_method(parser:step())
     if #packet.method < 1 then
-      return err_id.unknown_method, parser:get_byte()
+      return err_id.unknown_header_value, "method", parser:get_byte()
     end
   end,
   [headers.server] = function(byte, parser)
@@ -614,6 +630,17 @@ local parser_match = switch({
     end
 
     headers.reconnect = true
+  end,
+  [headers.csp] = function(byte, parser)
+    local packet = parser.packet
+    if packet.csp then
+      return err_id.duplicate_header, "csp"
+    end
+
+    packet.csp = get_version(parser:step())
+    if #packet.csp < 1 then
+      return err_id.unknown_header_value, "csp", parser:get_byte()
+    end
   end,
 
   default = function(byte, parser)
@@ -790,6 +817,18 @@ local stringify_match = switch({
     for i, v in ipairs(bytes) do
       table.insert(packet, v)
     end
+  end,
+  [headers.csp] = function(byte, packet, value)
+    if type(value) ~= "string" then
+      return {"version should be a string, got %s", type(value)}
+    end
+
+    local version = versions[value:lower()]
+
+    if not version then
+      return "unknown version: %s", value
+    end
+    table.insert(packet, version)
   end,
 })
 

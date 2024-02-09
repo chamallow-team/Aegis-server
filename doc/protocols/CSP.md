@@ -1,4 +1,6 @@
 # Client-Server Protocol (CSP)
+`Version 1.0`
+
 - [Usage](#usage)
 - [Header](#header)
   - [Control characters](#control-characters)
@@ -7,6 +9,7 @@
 - [Examples](#examples)
 - [Flow](#flow)
 - [Rules](#rules)
+- [Errors](#errors)
 
 *all bytes represented in the following documentation are decimals*
 
@@ -54,6 +57,7 @@ name|value
 [UPDATE](./headers/update.md) | 37
 [ID](./headers/id.md) | 38
 [RECONNECT](./headers/reconnect.md) | 39
+[CSP](./headers/csp.md) | 40
 
 ## Data
  TODO : define data
@@ -110,3 +114,24 @@ This is the differences between a server-client CSP packet and server-game CSP p
   - each *header* can only be set once by packet
   - an unknown value is concidered as corrupted packet
   - if some [data] is present, [`length`](./headers/length.md) method should be present
+TODO
+
+## Errors
+
+All parsing error should be reported in a string format, with 3 values:
+  - pos: the position where you encounter the problem
+  - message: a formated error message to provide quick understanding of the matter
+  - id: a fixed short value to allow any program to understand the error
+
+
+ Error                | Id                | Example of message                              | Explanation 
+ -------------------- | ----------------- | ----------------------------------------------- | ------------- 
+ duplicate header     | `DUP_HEADER`      | Duplicated header: method.                      | headers are uniques and cannot be set more than once
+ unknown header       | `UKWN_HEADER`     | Unknown header: 065.                            | if you encounter a value between [header range](#header) with no header associated
+ unknown header value | `UKWN_HEADER_VAL` | Unknown value for [method]: 090.                | if you encounter a value between [header value range](#header) with no value associated
+ unknown control      | `UKWN_CTRL`       | Unknown control: 09.                            | if you encounter a value between [control range](#control-characters) with no control associated
+ missing control      | `MISS_CTRL`       | Missing control: header_end.                    | if a control is not found where expected, eg header_end even so all buffer has been consumed
+ unexpected control   | `UNXPT_CTRL`      | Unexpected control: data_start.                 | if a control is found in a place where it shouldn't be, eg a data_start before a header_end
+ invalid number       | `INV_NUM`         | Invalid number: expected 8 bytes, found 6.      | invalid number, eg the buffer ends before the number is complete
+ invalid data length  | `INV_DATA_LEN`    | Invalid length header, data length mismatch it. | Length header should be exactly the length of the data 
+ unknown              | `UNKNOWN`         | *                                               | every other mistakes, that don't have a proper id to report.
