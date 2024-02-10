@@ -184,8 +184,6 @@ impl Shell {
 
 #[cfg(test)]
 mod test {
-    use std::env;
-
     #[test]
     fn test_shell_default(){
         use super::*;

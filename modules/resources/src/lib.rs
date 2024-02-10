@@ -11,7 +11,9 @@ pub trait Resource: Clone + Display + Sized + Sync {}
 /// This amount can go from 0 to infinity
 ///
 /// # Examples
-/// ```rs
+/// ```
+/// use resources::Food;
+///
 /// let mut food = Food::default();
 /// food.add(10);
 /// assert_eq!(food.get(), 10);
@@ -25,11 +27,13 @@ impl Food {
     /// Create a new Food with an amount
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Food;
+    ///
     /// let food = Food::new(10);
     /// assert_eq!(food.get(), 10);
     /// ```
-    fn new(amount: u64) -> Self {
+    pub fn new(amount: u64) -> Self {
         Self {
             amount
         }
@@ -37,12 +41,14 @@ impl Food {
     /// Add an amount of food
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Food;
+    ///
     /// let mut food = Food::default();
     /// food.add(10);
     /// assert_eq!(food.get(), 10);
     /// ```
-    fn add(&mut self, amount: u64) {
+    pub fn add(&mut self, amount: u64) {
         self.amount += amount;
     }
     /// Remove an amount of food
@@ -50,20 +56,24 @@ impl Food {
     /// Return false if the amount of food is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Food;
+    ///
     /// let mut food = Food::new(10);
     /// let r = food.remove(5);
     /// assert_eq!(food.get(), 5);
     /// assert!(r);
     /// ```
     ///
-    /// ```rs
+    /// ```
+    /// use resources::Food;
+    ///
     /// let mut food = Food::new(10);
     /// let r = food.remove(20);
-    /// assert_eq!(food.get(), 20);
+    /// assert_eq!(food.get(), 10);
     /// assert!(!r);
     /// ```
-    fn remove(&mut self, amount: u64) -> bool {
+    pub fn remove(&mut self, amount: u64) -> bool {
         if self.amount < amount {
             return false;
         }
@@ -71,7 +81,7 @@ impl Food {
         true
     }
     /// Get the amount of food
-    fn get(&self) -> u64 {
+    pub fn get(&self) -> u64 {
         self.amount
     }
 }
@@ -87,7 +97,9 @@ impl Resource for Food {}
 /// This amount can go from -infinity to infinity
 ///
 /// # Examples
-/// ```rs
+/// ```
+/// use resources::Money;
+///
 /// let mut money = Money::default();
 /// money.add(10);
 /// assert_eq!(money.get(), 10);
@@ -101,11 +113,13 @@ impl Money {
     /// Create new Money with an amount
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Money;
+    ///
     /// let money = Money::new(10);
     /// assert_eq!(money.get(), 10);
     /// ```
-    fn new(amount: i64) -> Self {
+    pub fn new(amount: i64) -> Self {
         Self {
             amount
         }
@@ -113,12 +127,14 @@ impl Money {
     /// Add an amount of money
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Money;
+    ///
     /// let mut money = Money::default();
     /// money.add(10);
     /// assert_eq!(money.get(), 10);
     /// ```
-    fn add(&mut self, amount: i64) {
+    pub fn add(&mut self, amount: i64) {
         self.amount += amount;
     }
     /// Remove an amount of money
@@ -126,39 +142,50 @@ impl Money {
     /// Return false if the amount of money is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Money;
+    ///
     /// let mut money = Money::new(10);
     /// let r = money.remove(5);
     /// assert_eq!(money.get(), 5);
     /// assert!(r);
     /// ```
     ///
-    /// ```rs
+    /// ```
+    /// use resources::Money;
+    ///
     /// let mut money = Money::new(10);
     /// let r = money.remove(20);
-    /// assert_eq!(money.get(), 20);
+    /// assert_eq!(money.get(), 10);
     /// assert!(!r);
-    fn remove(&mut self, amount: i64) -> bool {
+    pub fn remove(&mut self, amount: i64) -> bool {
+        if self.amount < amount {
+            return false;
+        }
         self.amount -= amount;
         true
     }
     /// Return true if the amount of money is negative
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Money;
+    ///
     /// let mut money = Money::new(10);
     /// assert!(!money.is_negative());
     /// ```
-    fn is_negative(&self) -> bool {
+    pub fn is_negative(&self) -> bool {
         self.amount < 0
     }
     /// Get the amount of money
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Money;
+    ///
     /// let mut money = Money::new(10);
     /// assert_eq!(money.get(), 10);
     /// ```
-    fn get(&self) -> i64 {
+    pub fn get(&self) -> i64 {
         self.amount
     }
 }
@@ -174,7 +201,9 @@ impl Resource for Money {}
 /// This amount can go from 0 to infinity
 ///
 /// # Examples
-/// ```rs
+/// ```
+/// use resources::WorkForce;
+///
 /// let mut work_force = WorkForce::default();
 /// work_force.add(10);
 /// assert_eq!(work_force.get(), 10);
@@ -188,11 +217,13 @@ impl WorkForce {
     /// Create new WorkForce with an amount
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::WorkForce;
+    ///
     /// let work_force = WorkForce::new(10);
     /// assert_eq!(work_force.get(), 10);
     /// ```
-    fn new(amount: u64) -> Self {
+    pub fn new(amount: u64) -> Self {
         Self {
             amount
         }
@@ -200,12 +231,15 @@ impl WorkForce {
     /// Add an amount of work force
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::WorkForce;
+    ///
     /// let mut work_force = WorkForce::default();
+    ///
     /// work_force.add(10);
     /// assert_eq!(work_force.get(), 10);
     /// ```
-    fn add(&mut self, amount: u64) {
+    pub fn add(&mut self, amount: u64) {
         self.amount += amount;
     }
     /// Remove an amount of work force
@@ -213,20 +247,24 @@ impl WorkForce {
     /// Return false if the amount of work force is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::WorkForce;
+    ///
     /// let mut work_force = WorkForce::new(10);
     /// let r = work_force.remove(5);
     /// assert_eq!(work_force.get(), 5);
     /// assert!(r);
     /// ```
     ///
-    /// ```rs
+    /// ```
+    /// use resources::WorkForce;
+    ///
     /// let mut work_force = WorkForce::new(10);
     /// let r = work_force.remove(20);
-    /// assert_eq!(work_force.get(), 20);
+    /// assert_eq!(work_force.get(), 10);
     /// assert!(!r);
     /// ```
-    fn remove(&mut self, amount: u64) -> bool {
+    pub fn remove(&mut self, amount: u64) -> bool {
         if self.amount < amount {
             return false;
         }
@@ -236,11 +274,13 @@ impl WorkForce {
     /// Get the amount of work force
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::WorkForce;
+    ///
     /// let mut work_force = WorkForce::new(10);
     /// assert_eq!(work_force.get(), 10);
     /// ```
-    fn get(&self) -> u64 {
+    pub fn get(&self) -> u64 {
         self.amount
     }
 }
@@ -256,10 +296,12 @@ impl Resource for WorkForce {}
 /// This amount can go from 0 to infinity
 ///
 /// # Examples
-/// ```rs
+/// ```
+/// use resources::Ores;
+///
 /// let mut ores = Ores::default();
-/// ores.add(10);
-/// assert_eq!(ores.get(), 10);
+/// ores.add_uranium(10);
+/// assert_eq!(ores.get_uranium(), 10);
 /// ```
 #[derive(Clone, Default)]
 pub struct Ores {
@@ -271,83 +313,101 @@ impl Ores {
     /// Create new Ores with an amount
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let ores = Ores::new(10, 20);
     /// assert_eq!(ores.get_uranium(), 10);
     /// assert_eq!(ores.get_rate_metals(), 20);
     /// ```
-    fn new(uranium: u64, rate_metals: u64) -> Self {
+    pub fn new(uranium: u64, rate_metals: u64) -> Self {
         Self {
             uranium,
             rate_metals
         }
     }
+
     /// Add an amount of uranium
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::default();
     /// ores.add_uranium(10);
     /// assert_eq!(ores.get_uranium(), 10);
     /// ```
-    fn add_uranium(&mut self, amount: u64) {
+    pub fn add_uranium(&mut self, amount: u64) {
         self.uranium += amount;
     }
+
     /// Add an amount of rate metals
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::default();
     /// ores.add_rate_metals(10);
     /// assert_eq!(ores.get_rate_metals(), 10);
     /// ```
-    fn add_rate_metals(&mut self, amount: u64) {
+    pub fn add_rate_metals(&mut self, amount: u64) {
         self.rate_metals += amount;
     }
+
     /// Remove an amount of uranium
     ///
     /// Return false if the amount of uranium is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::new(10, 20);
     /// let r = ores.remove_uranium(5);
     /// assert_eq!(ores.get_uranium(), 5);
     /// assert!(r);
     /// ```
     ///
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::new(10, 20);
     /// let r = ores.remove_uranium(20);
-    /// assert_eq!(ores.get_uranium(), 20);
+    /// assert_eq!(ores.get_uranium(), 10);
     /// assert!(!r);
     /// ```
-    fn remove_uranium(&mut self, amount: u64) -> bool {
+    pub fn remove_uranium(&mut self, amount: u64) -> bool {
         if self.uranium < amount {
             return false;
         }
         self.uranium -= amount;
         true
     }
+
     /// Remove an amount of rate metals
     ///
     /// Return false if the amount of rate metals is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::new(10, 20);
     /// let r = ores.remove_rate_metals(5);
-    /// assert_eq!(ores.get_rate_metals(), 5);
+    /// assert_eq!(ores.get_rate_metals(), 15);
     /// assert!(r);
     /// ```
     ///
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::new(10, 20);
-    /// let r = ores.remove_rate_metals(20);
+    /// let r = ores.remove_rate_metals(30);
     /// assert_eq!(ores.get_rate_metals(), 20);
     /// assert!(!r);
     /// ```
-    fn remove_rate_metals(&mut self, amount: u64) -> bool {
+    pub fn remove_rate_metals(&mut self, amount: u64) -> bool {
         if self.rate_metals < amount {
             return false;
         }
@@ -357,21 +417,25 @@ impl Ores {
     /// Get the amount of uranium
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::new(10, 20);
     /// assert_eq!(ores.get_uranium(), 10);
     /// ```
-    fn get_uranium(&self) -> u64 {
+    pub fn get_uranium(&self) -> u64 {
         self.uranium
     }
     /// Get the amount of rate metals
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Ores;
+    ///
     /// let mut ores = Ores::new(10, 20);
     /// assert_eq!(ores.get_rate_metals(), 20);
     /// ```
-    fn get_rate_metals(&self) -> u64 {
+    pub fn get_rate_metals(&self) -> u64 {
         self.rate_metals
     }
 }
@@ -393,85 +457,121 @@ impl RefinedProduct {
     /// Create new RefinedProduct with an amount
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let refined_product = RefinedProduct::new(10, 20, 30);
     /// assert_eq!(refined_product.get_alloys(), 10);
     /// assert_eq!(refined_product.get_chips(), 20);
     /// assert_eq!(refined_product.get_components(), 30);
     /// ```
-    fn add_alloys(&mut self, amount: u64) {
+    pub fn new(alloys: u64, chips: u64, components: u64) -> Self {
+        Self {
+            alloys,
+            chips,
+            components
+        }
+    }
+
+    /// Add an amount of alloys
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
+    /// let mut refined_product = RefinedProduct::default();
+    /// refined_product.add_alloys(10);
+    /// assert_eq!(refined_product.get_alloys(), 10);
+    /// ```
+    pub fn add_alloys(&mut self, amount: u64) {
         self.alloys += amount;
     }
+
     /// Add an amount of chips
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::default();
     /// refined_product.add_chips(10);
     /// assert_eq!(refined_product.get_chips(), 10);
     /// ```
-    fn add_chips(&mut self, amount: u64) {
+    pub fn add_chips(&mut self, amount: u64) {
         self.chips += amount;
     }
+
     /// Add an amount of components
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::default();
     /// refined_product.add_components(10);
     /// assert_eq!(refined_product.get_components(), 10);
     /// ```
-    fn add_components(&mut self, amount: u64) {
+    pub fn add_components(&mut self, amount: u64) {
         self.components += amount;
     }
+
     /// Remove an amount of alloys
     ///
     /// Return false if the amount of alloys is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::new(10, 20, 30);
     /// let r = refined_product.remove_alloys(5);
     /// assert_eq!(refined_product.get_alloys(), 5);
     /// assert!(r);
     /// ```
-    fn remove_alloys(&mut self, amount: u64) -> bool {
+    pub fn remove_alloys(&mut self, amount: u64) -> bool {
         if self.alloys < amount {
             return false;
         }
         self.alloys -= amount;
         true
     }
+
     /// Remove an amount of chips
     ///
     /// Return false if the amount of chips is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::new(10, 20, 30);
     /// let r = refined_product.remove_chips(5);
-    /// assert_eq!(refined_product.get_chips(), 5);
+    /// assert_eq!(refined_product.get_chips(), 15);
     /// assert!(r);
     /// ```
-    fn remove_chips(&mut self, amount: u64) -> bool {
+    pub fn remove_chips(&mut self, amount: u64) -> bool {
         if self.chips < amount {
             return false;
         }
         self.chips -= amount;
         true
     }
+
     /// Remove an amount of components
     ///
     /// Return false if the amount of components is not enough
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::new(10, 20, 30);
     /// let r = refined_product.remove_components(5);
-    /// assert_eq!(refined_product.get_components(), 5);
+    /// assert_eq!(refined_product.get_components(), 25);
     /// assert!(r);
     /// ```
-    fn remove_components(&mut self, amount: u64) -> bool {
+    pub fn remove_components(&mut self, amount: u64) -> bool {
         if self.components < amount {
             return false;
         }
@@ -481,31 +581,37 @@ impl RefinedProduct {
     /// Get the amount of alloys
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::new(10, 20, 30);
     /// assert_eq!(refined_product.get_alloys(), 10);
     /// ```
-    fn get_alloys(&self) -> u64 {
+    pub fn get_alloys(&self) -> u64 {
         self.alloys
     }
     /// Get the amount of chips
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::new(10, 20, 30);
     /// assert_eq!(refined_product.get_chips(), 20);
     /// ```
-    fn get_chips(&self) -> u64 {
+    pub fn get_chips(&self) -> u64 {
         self.chips
     }
     /// Get the amount of components
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::RefinedProduct;
+    ///
     /// let mut refined_product = RefinedProduct::new(10, 20, 30);
     /// assert_eq!(refined_product.get_components(), 30);
     /// ```
-    fn get_components(&self) -> u64 {
+    pub fn get_components(&self) -> u64 {
         self.components
     }
 }
@@ -521,10 +627,14 @@ impl Resource for RefinedProduct {}
 /// This amount can go from 0 to infinity
 ///
 /// # Examples
-/// ```rs
+/// ```
+/// use resources::{Expert, ScientificResearch};
+///
 /// let mut scientific_research = ScientificResearch::default();
-/// scientific_research.add(10);
-/// assert_eq!(scientific_research.get(), 10);
+/// assert_eq!(scientific_research.size(), 0);
+///
+/// scientific_research.add_expert(Expert::new(10));
+/// assert_eq!(scientific_research.size(), 1);
 /// ```
 #[derive(Clone, Default)]
 pub struct ScientificResearch {
@@ -535,12 +645,17 @@ impl ScientificResearch {
     /// Create new ScientificResearch with an amount
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::ScientificResearch;
+    ///
     /// let scientific_research = ScientificResearch::default();
     /// assert_eq!(scientific_research.size(), 0);
     /// ```
-    /// ```rs
-    /// let scientific_research = ScientificResearch::new(10);
+    ///
+    /// ```
+    /// use resources::{Expert, ScientificResearch};
+    ///
+    /// let mut scientific_research = ScientificResearch::default();
     /// scientific_research.add_expert(Expert::new(10));
     /// assert_eq!(scientific_research.size(), 1);
     /// ```
@@ -551,13 +666,17 @@ impl ScientificResearch {
     /// Add an amount of scientific research
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::ScientificResearch;
+    ///
     /// let mut scientific_research = ScientificResearch::default();
     /// assert_eq!(scientific_research.size(), 0);
     /// ```
     ///
-    /// ```rs
-    /// let mut scientific_research = ScientificResearch::new(10);
+    /// ```
+    /// use resources::{Expert, ScientificResearch};
+    ///
+    /// let mut scientific_research = ScientificResearch::default();
     /// scientific_research.add_expert(Expert::new(10));
     /// assert_eq!(scientific_research.size(), 1);
     /// ```
@@ -568,10 +687,12 @@ impl ScientificResearch {
     /// Add an amount of scientific research
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::{Expert, ScientificResearch};
+    ///
     /// let mut scientific_research = ScientificResearch::default();
-    /// scientific_research.add(Expert::new(10));
-    /// scientific_research.add(Expert::new(20));
+    /// scientific_research.add_expert(Expert::new(10));
+    /// scientific_research.add_expert(Expert::new(20));
     ///
     /// assert_eq!(scientific_research.get_amount(), 30);
     /// ```
@@ -595,7 +716,9 @@ impl Resource for ScientificResearch {}
 /// Represent a scientific expert
 ///
 /// # Examples
-/// ```rs
+/// ```
+/// use resources::Expert;
+///
 /// let expert = Expert::new(10);
 /// assert_eq!(expert.get_level(), 10);
 /// ```
@@ -608,21 +731,26 @@ impl Expert {
     /// Create a new Expert with a level
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Expert;
+    ///
     /// let expert = Expert::new(10);
     /// assert_eq!(expert.get_level(), 10);
     /// ```
-    fn new(level: u8) -> Self {
+    pub fn new(level: u8) -> Self {
         Self { level }
     }
+
     /// Get the level of the expert
     ///
     /// # Examples
-    /// ```rs
+    /// ```
+    /// use resources::Expert;
+    ///
     /// let expert = Expert::new(10);
     /// assert_eq!(expert.get_level(), 10);
     /// ```
-    fn get_level(&self) -> u8 {
+    pub fn get_level(&self) -> u8 {
         self.level
     }
 }
