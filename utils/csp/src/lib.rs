@@ -4,7 +4,9 @@ use std::{
     result, vec,
 };
 
-use parser::{Parser, ParserError};
+use smol::io::AsyncRead;
+
+use parser::{AsyncParser, Parser, ParserError};
 
 pub mod parser;
 
@@ -355,10 +357,14 @@ impl Header {
         todo!()
     }
 
+    pub fn from_buffer_async<T: AsyncRead>(bytes: AsyncParser<T>) -> result::Result<Header, ParserError> {
+        todo!()
+    }
+
     pub fn to_vec(&self) -> Vec<u8> {
         return Self::to_buffer(self);
     }
-    pub fn from_vec<T: Read>(&self, bytes: &mut Parser<T>) -> result::Result<Header, ParserError> {
+    pub fn from_vec<T: Read + AsyncRead>(&self, bytes: &mut Parser<T>) -> result::Result<Header, ParserError> {
         todo!()
     }
 }
