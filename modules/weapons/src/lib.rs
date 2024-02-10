@@ -52,14 +52,15 @@ pub struct Damages {
 ///
 /// # Example
 ///
-/// ```rs
+/// ```
+/// use weapons::{Damages, WeaponInformations};
+///
 /// let weapon = WeaponInformations {
 ///   name: "M4A1".to_string(),
 ///   caliber: 5.56,
-///   damages: Damages::default(),
 ///   speed: 900.0,
 ///   range: 500.0,
-///   fire_rate: 800.0
+///   country_reference: "fr".into()
 /// };
 /// ```
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
@@ -79,6 +80,7 @@ pub struct WeaponInformations {
     /// TODO Use a custom type instead of a String
     pub country_reference: String
 }
+
 #[cfg(feature = "load_configuration")]
 pub mod loader {
     use std::{fs, io};
