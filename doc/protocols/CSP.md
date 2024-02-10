@@ -134,4 +134,5 @@ All parsing error should be reported in a string format, with 3 values:
  unexpected control   | `UNXPT_CTRL`      | Unexpected control: data_start.                 | if a control is found in a place where it shouldn't be, eg a data_start before a header_end
  invalid number       | `INV_NUM`         | Invalid number: expected 8 bytes, found 6.      | invalid number, eg the buffer ends before the number is complete
  invalid data length  | `INV_DATA_LEN`    | Invalid length header, data length mismatch it. | Length header should be exactly the length of the data 
+ invalid_str          | `INV_STR`         | Invalid utf-8 string                            | when parsing an header string goes wrong
  unknown              | `UNKNOWN`         | *                                               | every other mistakes, that don't have a proper id to report.

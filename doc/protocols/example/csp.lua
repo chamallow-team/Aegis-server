@@ -36,6 +36,7 @@ local err_id = {
   unexpected_control = "UNXPT_CTRL",
   invalid_number = "INV_NUM",
   invalid_data_length = "INV_DATA_LEN",
+  invalid_string = "INV_STR",
 
   unknown = "UNKNOWN",
 }
@@ -49,7 +50,8 @@ local err_msg = {
   [err_id.missing_control] = "Missing control: %s.",
   [err_id.unexpected_control] = "Unexpected control: %s.",
   [err_id.invalid_number] = "Invalid number: expected %d bytes, found %d.",
-  [err_id.invalid_data_length] = "Invalid length header, data length mismatch it."
+  [err_id.invalid_data_length] = "Invalid length header, data length mismatch it.",
+  [err_id.invalid_string] = "Invalid utf-8 string.",
 }
 
 
