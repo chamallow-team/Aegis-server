@@ -1,7 +1,3 @@
-//! TODO: Add documentation
-//! TODO: Add functions to send specific log levels
-//! TODO: Add macros to send logs (e.g. info!(l: logger, "Hello, world!"))
-//! TODO: Open the Style api
 //! TODO: Open the rules api
 //! TODO: Test everything above (shit)
 pub mod rules;
@@ -200,6 +196,137 @@ impl Logger {
             .contains_key(&id.into())
     }
 }
+
+impl Deref for Logger {
+    type Target = Arc<RwLock<HashMap<StreamID, Stream>>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.streams
+    }
+}
+
+pub fn info(l: &Logger, log: impl Into<Log>) {
+    smol::block_on(async {
+        l.send_log(log.into()).await;
+    });
+}
+
+pub fn panic(lg: &Logger, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Panic);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn error(lg: &Logger, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Error);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn warn(lg: &Logger, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Warn);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn debug(lg: &Logger, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Debug);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn trace(lg: &Logger, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Trace);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+// define macros for the log levels
+#[macro_export]
+macro_rules! info {
+    ($l:ident, $m:expr) => {
+        $crate::info(&$l, $m);
+    };
+    ($l:ident, $m:expr, $($arg:tt)*) => {
+        $crate::info(&$l, format!($m, $($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! panic {
+    ($l:ident, $m:expr) => {
+        $crate::panic(&$l, $m);
+    };
+    ($l:ident, $m:expr, $($arg:tt)*) => {
+        $crate::panic(&$l, format!($m, $($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! error {
+    ($l:ident, $m:expr) => {
+        $crate::error(&$l, $m);
+    };
+    ($l:ident, $m:expr, $($arg:tt)*) => {
+        $crate::error(&$l, format!($m, $($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! warn {
+    ($l:ident, $m:expr) => {
+        $crate::warn(&$l, $m);
+    };
+    ($l:ident, $m:expr, $($arg:tt)*) => {
+        $crate::warn(&$l, format!($m, $($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! debug {
+    ($l:ident, $m:expr) => {
+        $crate::debug(&$l, $m);
+    };
+    ($l:ident, $m:expr, $($arg:tt)*) => {
+        $crate::debug(&$l, format!($m, $($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! trace {
+    ($l:ident, $m:expr) => {
+        $crate::trace(&$l, $m);
+    };
+    ($l:ident, $m:expr, $($arg:tt)*) => {
+        $crate::trace(&$l, format!($m, $($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! log {
+    ($l:ident, $t:ident, $m:expr) => {
+        $crate::$t(&$l, $m);
+    };
+    ($l:ident, $t:ident, $m:expr, $($arg:tt)*) => {
+        $crate::$t(&$l, format!($m, $($arg)*));
+    };
+}
+
 
 #[cfg(test)]
 mod test {

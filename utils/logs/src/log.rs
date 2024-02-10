@@ -56,6 +56,11 @@ impl Log {
         self.log_type
     }
 
+    /// Set the type of the log.
+    pub fn set_log_type(&mut self, log_type: LogType) {
+        self.log_type = log_type;
+    }
+
     /// Returns the date of the log.
     pub fn date(&self) -> chrono::DateTime<chrono::Utc> {
         self.date

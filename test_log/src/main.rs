@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::Read;
 use logs::fmt::{DateStyle, Style};
-use logs::log::LogType;
 use logs::Logger;
 
 fn main() {
@@ -24,7 +23,8 @@ fn main() {
         logger.send_log("Test 1".into()).await;
         logger.send_log("Test 2".into()).await;
 
-        logger.send_log((LogType::Error, "Test 3").into()).await;
+        logs::panic!(logger, "Panic!");
+        logs::trace!(logger, "the program panicked!");
     });
 
     logger.stop().expect("Failed to stop logger");
