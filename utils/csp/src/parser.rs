@@ -136,7 +136,6 @@ impl fmt::Display for ParserError {
 pub type ParseResult<R> = std::result::Result<R, ParserError>;
 
 // FIXME: might be useless
-/// does nothing except telling that those who implement this trait are csp parser
 pub trait CspParser {
     /// tells the position of the parser's cursor
     ///
