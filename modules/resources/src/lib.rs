@@ -792,7 +792,7 @@ mod resources_test {
         assert_eq!(money.get(), 5);
         money.remove(10);
         assert_eq!(money.get(), 5);
-        assert!(money.is_negative());
+        assert!(!money.is_negative());
     }
 
     #[test]
