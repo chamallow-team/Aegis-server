@@ -1,19 +1,15 @@
-use std::{
-    fmt,
-    io::{self, Read},
-    result, vec,
-};
+use std::{io::Read, result, vec};
 
 use smol::io::AsyncRead;
 
-use parser::{AsyncParser, Parser, ParserError};
+use parser::{AsyncParser, CspParser, Parser, ParserError, ParserErrorId};
 
 pub mod parser;
 
 // ======================= Csp constants =======================
 
 /// see /doc/protocols/CSP.md#control-characters
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Control {
     /// Ends of an header part.
     ///
@@ -45,13 +41,28 @@ impl Control {
             _ => None,
         }
     }
-    pub fn to_u8(ctrl: Control) -> u8 {
+    pub fn to_u8(ctrl: &Control) -> u8 {
         match ctrl {
             Self::HeaderEnd => 1,
             Self::DataStart => 2,
             Self::StringStart => 3,
             Self::StringEnd => 4,
         }
+    }
+
+    pub fn to_str(ctrl: &Control) -> &'static str {
+        match ctrl {
+            Control::HeaderEnd => "header_end",
+            Control::DataStart => "data_start",
+            Control::StringStart => "string_start",
+            Control::StringEnd => "string_end",
+        }
+    }
+}
+
+impl ToString for Control {
+    fn to_string(&self) -> String {
+        Self::to_str(self).to_string()
     }
 }
 
@@ -68,18 +79,7 @@ impl TryFrom<u8> for Control {
 
 impl Into<u8> for Control {
     fn into(self) -> u8 {
-        Self::to_u8(self)
-    }
-}
-
-impl fmt::Display for Control {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Control::HeaderEnd => write!(f, "header_end"),
-            Control::DataStart => write!(f, "data_start"),
-            Control::StringStart => write!(f, "string_start"),
-            Control::StringEnd => write!(f, "string_end"),
-        }
+        Self::to_u8(&self)
     }
 }
 
@@ -137,7 +137,6 @@ impl Method {
             _ => None,
         }
     }
-
     pub fn to_u8(method: &Method) -> u8 {
         match method {
             Method::Connect => 32,
@@ -149,6 +148,25 @@ impl Method {
             Method::Error => 38,
             Method::State => 39,
         }
+    }
+
+    pub fn to_str(method: &Method) -> &'static str {
+        match method {
+            Method::Connect => "connect",
+            Method::Auth => "auth",
+            Method::Disconnect => "disconnect",
+            Method::Admin => "admin",
+            Method::Update => "uodate",
+            Method::Action => "action",
+            Method::Error => "error",
+            Method::State => "state",
+        }
+    }
+}
+
+impl ToString for Method {
+    fn to_string(&self) -> String {
+        Self::to_str(self).to_string()
     }
 }
 
@@ -170,7 +188,7 @@ impl Into<u8> for Method {
 }
 
 /// see /doc/protocols/headers/csp.md
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Version {
     /// current version
     V10,
@@ -183,11 +201,22 @@ impl Version {
             _ => None,
         }
     }
-
     pub fn to_u8(version: &Version) -> u8 {
         match version {
             Version::V10 => 32,
         }
+    }
+
+    pub fn to_str(version: &Version) -> &'static str {
+        match version {
+            Version::V10 => "1.0",
+        }
+    }
+}
+
+impl ToString for Version {
+    fn to_string(&self) -> String {
+        Self::to_str(self).to_string()
     }
 }
 
@@ -207,21 +236,6 @@ impl Into<u8> for Version {
         Self::to_u8(&self)
     }
 }
-
-impl fmt::Display for Version {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Version::V10 => write!(f, "1.0"),
-        }
-    }
-}
-
-impl fmt::Debug for Version {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(self, f)
-    }
-}
-
 /// see /doc/protocols/CSP.md#header-keys
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Header {
@@ -353,19 +367,15 @@ impl Header {
             _ => vec![],
         }
     }
-    pub fn from_buffer<T: Read>(bytes: Parser<T>) -> result::Result<Header, ParserError> {
-        todo!()
-    }
-
-    pub fn from_buffer_async<T: AsyncRead>(bytes: AsyncParser<T>) -> result::Result<Header, ParserError> {
-        todo!()
-    }
 
     pub fn to_vec(&self) -> Vec<u8> {
         return Self::to_buffer(self);
     }
-    pub fn from_vec<T: Read + AsyncRead>(&self, bytes: &mut Parser<T>) -> result::Result<Header, ParserError> {
-        todo!()
+}
+
+impl ToString for Header {
+    fn to_string(&self) -> String {
+        Self::to_str(self).to_string()
     }
 }
 
@@ -873,10 +883,263 @@ impl Packet {
         self.buffer_valid = false;
     }
 
-    pub fn parse<T: io::Read>(&mut self, reader: T) -> result::Result<usize, ParserError> {
-        todo!()
+    pub fn parse<T: Read>(&mut self, parser: &mut Parser<T>) -> result::Result<usize, ParserError> {
+        // reset the parser state
+        parser.reset();
+        // become a clean brand new packet
+        self.clear();
+
+        loop {
+            let byte = parser.read_byte()?;
+
+            // maybe a control
+            if byte < 32 {
+                let ctrl = match Control::from_u8(byte) {
+                    Some(c) => c,
+                    None => {
+                        let mut error = ParserError::new(ParserErrorId::UkwnCtrl, parser.pos());
+                        error.set_desc("{1}", format!("{:03}", byte));
+                        return Err(error);
+                    }
+                };
+
+                match ctrl {
+                    // let the data be gathered if any
+                    Control::HeaderEnd => break,
+                    _ => {
+                        let mut error = ParserError::new(ParserErrorId::UnxptCtrl, parser.pos());
+                        error.set_desc("{1}", ctrl);
+                        return Err(error);
+                    }
+                };
+            } else {
+                /* byte >= 32 */
+                let header = match Header::from_u8(byte) {
+                    Some(h) => h,
+                    None => {
+                        let mut error = ParserError::new(ParserErrorId::UkwnHeader, parser.pos());
+                        error.set_desc("{1}", format!("{:03}", byte));
+                        return Err(error);
+                    }
+                };
+
+                // no duplicates
+                if !matches!(self.get_header(header.to_string()), None) {
+                    let mut error = ParserError::new(ParserErrorId::DupHeader, parser.pos());
+                    error.set_desc("{1}", header.to_string());
+                    return Err(error);
+                }
+
+                // parse the header
+                match header {
+                    Header::Method(_) => {
+                        match Method::from_u8(parser.read_byte()?) {
+                            Some(m) => self.set_header(Header::Method(m)),
+                            None => {
+                                let mut error =
+                                    ParserError::new(ParserErrorId::UkwnHeaderVal, parser.pos());
+                                error.set_desc("{1}", header.to_string());
+                                error.set_desc("{2}", format!("{:03}", byte));
+                                return Err(error);
+                            }
+                        };
+                    }
+                    Header::Csp(_) => {
+                        match Version::from_u8(parser.read_byte()?) {
+                            Some(v) => self.set_header(Header::Csp(v)),
+                            None => {
+                                let mut error =
+                                    ParserError::new(ParserErrorId::UkwnHeaderVal, parser.pos());
+                                error.set_desc("{1}", header.to_string());
+                                error.set_desc("{2}", format!("{:03}", byte));
+                                return Err(error);
+                            }
+                        };
+                    }
+                    Header::Server(_) => self.set_header(Header::Server(parser.read_u32()?)),
+                    Header::Length(_) => self.set_header(Header::Length(parser.read_u64()?)),
+                    Header::Id(_) => self.set_header(Header::Id(parser.read_u64()?)),
+                    Header::Identity(_) => self.set_header(Header::Identity(parser.read_string()?)),
+                    Header::Version(_) => self.set_header(Header::Version(parser.read_string()?)),
+                    Header::Update(_) => self.set_header(Header::Update(true)),
+                    Header::Reconnect(_) => self.set_header(Header::Reconnect(true)),
+                };
+            }
+        }
+
+        if !matches!(self.get_header("length"), None) {
+            match parser.read_byte() {
+                Ok(b) if b == Control::DataStart.into() => {},
+                _ => {
+                    let mut error =
+                        ParserError::new(ParserErrorId::MissCtrl, parser.pos());
+                    error.set_desc("{1}", Control::DataStart.to_string());
+                    return Err(error);
+                }
+            }
+            
+            let mut length: u64 = self
+                .get_header("length")
+                .unwrap_or(Header::Length(0))
+                .try_into()
+                .unwrap();
+
+            // FIXME: if the length header is greater than the actual data length, the parser will block for more bytes, that's actual bad behavior
+            loop {
+                let mut chunk_size = 256;
+                if length < chunk_size {
+                    chunk_size = length;
+                }
+                let chunk = parser.read(chunk_size as usize);
+                if chunk.len() as u64 != chunk_size {
+                    let error = ParserError::new(ParserErrorId::InvDataLen, parser.pos());
+                    return Err(error);
+                }
+
+                self.append_data(chunk);
+                length -= chunk_size;
+                if length == 0 {
+                    break;
+                }
+            }
+        }
+
+        return Ok(parser.reset());
+    }
+
+    pub async fn parse_async<T: AsyncRead + std::marker::Unpin>(
+        &mut self,
+        parser: &mut AsyncParser<T>,
+    ) -> result::Result<usize, ParserError> {
+        // reset the parser state
+        parser.reset();
+        // become a clean brand new packet
+        self.clear();
+
+        loop {
+            let byte = parser.read_byte().await?;
+
+            // maybe a control
+            if byte < 32 {
+                let ctrl = match Control::from_u8(byte) {
+                    Some(c) => c,
+                    None => {
+                        let mut error = ParserError::new(ParserErrorId::UkwnCtrl, parser.pos());
+                        error.set_desc("{1}", format!("{:03}", byte));
+                        return Err(error);
+                    }
+                };
+
+                match ctrl {
+                    // let the data be gathered if any
+                    Control::HeaderEnd => break,
+                    _ => {
+                        let mut error = ParserError::new(ParserErrorId::UnxptCtrl, parser.pos());
+                        error.set_desc("{1}", ctrl);
+                        return Err(error);
+                    }
+                };
+            } else {
+                /* byte >= 32 */
+                let header = match Header::from_u8(byte) {
+                    Some(h) => h,
+                    None => {
+                        let mut error = ParserError::new(ParserErrorId::UkwnHeader, parser.pos());
+                        error.set_desc("{1}", format!("{:03}", byte));
+                        return Err(error);
+                    }
+                };
+
+                // no duplicates
+                if !matches!(self.get_header(header.to_string()), None) {
+                    let mut error = ParserError::new(ParserErrorId::DupHeader, parser.pos());
+                    error.set_desc("{1}", header.to_string());
+                    return Err(error);
+                }
+
+                // parse the header
+                match header {
+                    Header::Method(_) => {
+                        match Method::from_u8(parser.read_byte().await?) {
+                            Some(m) => self.set_header(Header::Method(m)),
+                            None => {
+                                let mut error =
+                                    ParserError::new(ParserErrorId::UkwnHeaderVal, parser.pos());
+                                error.set_desc("{1}", header.to_string());
+                                error.set_desc("{2}", format!("{:03}", byte));
+                                return Err(error);
+                            }
+                        };
+                    }
+                    Header::Csp(_) => {
+                        match Version::from_u8(parser.read_byte().await?) {
+                            Some(v) => self.set_header(Header::Csp(v)),
+                            None => {
+                                let mut error =
+                                    ParserError::new(ParserErrorId::UkwnHeaderVal, parser.pos());
+                                error.set_desc("{1}", header.to_string());
+                                error.set_desc("{2}", format!("{:03}", byte));
+                                return Err(error);
+                            }
+                        };
+                    }
+                    Header::Server(_) => self.set_header(Header::Server(parser.read_u32().await?)),
+                    Header::Length(_) => self.set_header(Header::Length(parser.read_u64().await?)),
+                    Header::Id(_) => self.set_header(Header::Id(parser.read_u64().await?)),
+                    Header::Identity(_) => {
+                        self.set_header(Header::Identity(parser.read_string().await?))
+                    }
+                    Header::Version(_) => {
+                        self.set_header(Header::Version(parser.read_string().await?))
+                    }
+                    Header::Update(_) => self.set_header(Header::Update(true)),
+                    Header::Reconnect(_) => self.set_header(Header::Reconnect(true)),
+                };
+            }
+        }
+
+        if !matches!(self.get_header("length"), None) {
+            match parser.read_byte().await {
+                Ok(b) if b == Control::DataStart.into() => {},
+                _ => {
+                    let mut error =
+                        ParserError::new(ParserErrorId::MissCtrl, parser.pos());
+                    error.set_desc("{1}", Control::DataStart.to_string());
+                    return Err(error);
+                }
+            }
+            
+            let mut length: u64 = self
+                .get_header("length")
+                .unwrap_or(Header::Length(0))
+                .try_into()
+                .unwrap();
+
+            // FIXME: if the length header is greater than the actual data length, the parser will block for more bytes, that's actual bad behavior
+            loop {
+                let mut chunk_size = 256;
+                if length < chunk_size {
+                    chunk_size = length;
+                }
+                let chunk = parser.read(chunk_size as usize).await;
+                if chunk.len() as u64 != chunk_size {
+                    let error = ParserError::new(ParserErrorId::InvDataLen, parser.pos());
+                    return Err(error);
+                }
+
+                self.append_data(chunk);
+                length -= chunk_size;
+                if length == 0 {
+                    break;
+                }
+            }
+        }
+
+        return Ok(parser.reset());
     }
 }
+
+// ======================= Parse =======================
 
 // ======================= Tests =======================
 
@@ -1012,36 +1275,36 @@ mod tests {
         assert_eq!(buffer, alt_buffer);
     }
 
-    #[test]
-    fn packet_parse() {
-        let mut parser = Packet::default();
+    // #[test]
+    // fn packet_parse() {
+    //     let mut parser = Packet::default();
 
-        let packets: Vec<(Option<ParserErrorId>, &[u8])> = vec![
-            // unexpected control: data_start
-            //(Some(ParserErrorId::UnxptCtrl), &[32, 32, 02, 01]),
-            // unknown control: 006
-            //(Some(ParserErrorId::UkwnCtrl), &[32, 32, 06, 01]),
-            // unknown control: 090
-            //(Some(ParserErrorId::UkwnHeader), &[32, 32, 90, 01]),
-        ];
+    //     let packets: Vec<(Option<ParserErrorId>, &[u8])> = vec![
+    //         // unexpected control: data_start
+    //         //(Some(ParserErrorId::UnxptCtrl), &[32, 32, 02, 01]),
+    //         // unknown control: 006
+    //         //(Some(ParserErrorId::UkwnCtrl), &[32, 32, 06, 01]),
+    //         // unknown control: 090
+    //         //(Some(ParserErrorId::UkwnHeader), &[32, 32, 90, 01]),
+    //     ];
 
-        for (pos, (id, packet)) in packets.iter().enumerate() {
-            let result = parser.parse(&mut std::io::BufReader::new(*packet));
+    //     for (pos, (id, packet)) in packets.iter().enumerate() {
+    //         let result = parser.parse(&mut std::io::BufReader::new(*packet));
 
-            match result {
-                Ok(_) => panic!("test {pos}: expected {:?}", id.clone().unwrap()),
-                Err(err) => {
-                    if err.id != id.clone().unwrap() {
-                        panic!(
-                            "test {pos}: expected {:?} got {:?}",
-                            err.id,
-                            id.clone().unwrap()
-                        )
-                    }
-                }
-            }
+    //         match result {
+    //             Ok(_) => panic!("test {pos}: expected {:?}", id.clone().unwrap()),
+    //             Err(err) => {
+    //                 if err.id != id.clone().unwrap() {
+    //                     panic!(
+    //                         "test {pos}: expected {:?} got {:?}",
+    //                         err.id,
+    //                         id.clone().unwrap()
+    //                     )
+    //                 }
+    //             }
+    //         }
 
-            parser.clear();
-        }
-    }
+    //         parser.clear();
+    //     }
+    // }
 }
