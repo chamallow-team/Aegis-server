@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod missiles;
 pub mod shells;
+pub mod torpedo;
 
 /// Speed in meters per second
 ///
