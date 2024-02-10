@@ -1,5 +1,5 @@
-//! TODO: Open the rules api
-//! TODO: Test everything above (shit)
+//! FIXME The rules doesn't always work, it's a fucking mystery why it doesn't work
+
 pub mod rules;
 pub mod log;
 mod runner;
@@ -195,6 +195,36 @@ impl Logger {
             .read().await
             .contains_key(&id.into())
     }
+
+    /// Get the global rules.
+    pub async fn get_global_rules(&self) -> Vec<rules::Rule> {
+        self.rules.read().await.get_global_rules().to_vec()
+    }
+
+    /// Add a global rule to the logger.
+    pub async fn add_global_rule(&mut self, rule: rules::Rule) {
+        self.rules.write().await.add_global_rule(rule);
+    }
+
+    /// Get the route rules.
+    pub async fn get_route_rules(&self) -> HashMap<rules::RuleRootPattern, rules::RouteRules> {
+        self.rules.read().await.get_route_rules().clone()
+    }
+
+    /// Add a route rule to the logger.
+    pub async fn add_route_rule(&mut self, stream: impl Into<rules::RuleRootPattern>, rule: rules::Rule) {
+        self.rules.write().await.add_route_rule(stream.into(), rule);
+    }
+
+    /// Get the global rule at the given index.
+    pub async fn get_global_rule(&self, index: usize) -> Option<rules::Rule> {
+        self.rules.read().await.get_global_rule(index).cloned()
+    }
+
+    /// Get the route rule at the given index.
+    pub async fn get_route_rule(&self, route: &rules::RuleRootPattern, index: usize) -> Option<rules::Rule> {
+        self.rules.read().await.get_route_rule(route, index).cloned()
+    }
 }
 
 impl Deref for Logger {
@@ -211,8 +241,27 @@ pub fn info(l: &Logger, log: impl Into<Log>) {
     });
 }
 
+pub fn info_with_route(l: &Logger, route: impl Into<String>, log: impl Into<Log>) {
+    let mut log = log.into();
+    log.set_route(route.into());
+    log.set_log_type(log::LogType::Info);
+
+    smol::block_on(async {
+        l.send_log(log).await;
+    });
+}
 pub fn panic(lg: &Logger, m: impl ToString) {
     let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Panic);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn panic_with_route(lg: &Logger, route: impl Into<String>, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_route(route.into());
     l.set_log_type(log::LogType::Panic);
 
     smol::block_on(async {
@@ -229,8 +278,28 @@ pub fn error(lg: &Logger, m: impl ToString) {
     });
 }
 
+pub fn error_with_route(lg: &Logger, route: impl Into<String>, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_route(route.into());
+    l.set_log_type(log::LogType::Error);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
 pub fn warn(lg: &Logger, m: impl ToString) {
     let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Warn);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn warn_with_route(lg: &Logger, route: impl Into<String>, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_route(route.into());
     l.set_log_type(log::LogType::Warn);
 
     smol::block_on(async {
@@ -247,8 +316,28 @@ pub fn debug(lg: &Logger, m: impl ToString) {
     });
 }
 
+pub fn debug_with_route(lg: &Logger, route: impl Into<String>, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_route(route.into());
+    l.set_log_type(log::LogType::Debug);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
 pub fn trace(lg: &Logger, m: impl ToString) {
     let mut l = Log::new(m.to_string());
+    l.set_log_type(log::LogType::Trace);
+
+    smol::block_on(async {
+        lg.send_log(l).await;
+    });
+}
+
+pub fn trace_with_route(lg: &Logger, route: impl Into<String>, m: impl ToString) {
+    let mut l = Log::new(m.to_string());
+    l.set_route(route.into());
     l.set_log_type(log::LogType::Trace);
 
     smol::block_on(async {
@@ -265,6 +354,12 @@ macro_rules! info {
     ($l:ident, $m:expr, $($arg:tt)*) => {
         $crate::info(&$l, format!($m, $($arg)*));
     };
+    ($l:ident, route: $r:expr, $m:expr) => {
+        $crate::info_with_route(&$l, $r, $m);
+    };
+    ($l:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::info_with_route(&$l, $r, format!($m, $($arg)*));
+    };
 }
 
 #[macro_export]
@@ -274,6 +369,12 @@ macro_rules! panic {
     };
     ($l:ident, $m:expr, $($arg:tt)*) => {
         $crate::panic(&$l, format!($m, $($arg)*));
+    };
+    ($l:ident, route: $r:expr, $m:expr) => {
+        $crate::panic_with_route(&$l, $r, $m);
+    };
+    ($l:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::panic_with_route(&$l, $r, format!($m, $($arg)*));
     };
 }
 
@@ -285,6 +386,12 @@ macro_rules! error {
     ($l:ident, $m:expr, $($arg:tt)*) => {
         $crate::error(&$l, format!($m, $($arg)*));
     };
+    ($l:ident, route: $r:expr, $m:expr) => {
+        $crate::error_with_route(&$l, $r, $m);
+    };
+    ($l:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::error_with_route(&$l, $r, format!($m, $($arg)*));
+    };
 }
 
 #[macro_export]
@@ -294,6 +401,12 @@ macro_rules! warn {
     };
     ($l:ident, $m:expr, $($arg:tt)*) => {
         $crate::warn(&$l, format!($m, $($arg)*));
+    };
+    ($l:ident, route: $r:expr, $m:expr) => {
+        $crate::warn_with_route(&$l, $r, $m);
+    };
+    ($l:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::warn_with_route(&$l, $r, format!($m, $($arg)*));
     };
 }
 
@@ -305,6 +418,12 @@ macro_rules! debug {
     ($l:ident, $m:expr, $($arg:tt)*) => {
         $crate::debug(&$l, format!($m, $($arg)*));
     };
+    ($l:ident, route: $r:expr, $m:expr) => {
+        $crate::debug_with_route(&$l, $r, $m);
+    };
+    ($l:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::debug_with_route(&$l, $r, format!($m, $($arg)*));
+    };
 }
 
 #[macro_export]
@@ -315,6 +434,12 @@ macro_rules! trace {
     ($l:ident, $m:expr, $($arg:tt)*) => {
         $crate::trace(&$l, format!($m, $($arg)*));
     };
+    ($l:ident, route: $r:expr, $m:expr) => {
+        $crate::trace_with_route(&$l, $r, $m);
+    };
+    ($l:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::trace_with_route(&$l, $r, format!($m, $($arg)*));
+    };
 }
 
 #[macro_export]
@@ -324,6 +449,12 @@ macro_rules! log {
     };
     ($l:ident, $t:ident, $m:expr, $($arg:tt)*) => {
         $crate::$t(&$l, format!($m, $($arg)*));
+    };
+    ($l:ident, $t:ident, route: $r:expr, $m:expr) => {
+        $crate::$t(&l, route: $r, $m);
+    };
+    ($l:ident, $t:ident, route: $r:expr, $m:expr, $($arg:tt)*) => {
+        $crate::$t(&l, route: $r, format!($m, $($arg)*));
     };
 }
 

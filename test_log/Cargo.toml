@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 logs = { path = "../utils/logs" }
 smol = { workspace = true }
+regex = "1.10.3"
