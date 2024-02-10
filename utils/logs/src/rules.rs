@@ -91,7 +91,12 @@ impl Rules {
         self.locals.get(id)
     }
 
+    #[allow(unused)]
+    fn is_locally_allowed(log: &Log, route: &RouteRules) -> bool {
+        route.is_allowed(log)
+    }
 
+    #[allow(unused)]
     /// Returns the first rule that matches the log.
     pub(crate) fn get_route_for_log(&self, log: &Log) -> Option<(&RuleRootPattern, &RouteRules)> {
         let route_path = log.route().unwrap_or_default();

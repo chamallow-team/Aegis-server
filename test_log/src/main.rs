@@ -1,10 +1,18 @@
 use std::fs::File;
 use std::io::Read;
+use logs::fmt::{DateStyle, Style};
 use logs::log::LogType;
 use logs::Logger;
 
 fn main() {
     let mut logger = Logger::new();
+
+    let mut style = Style::default();
+    style.set_pattern("[{date}] \x1b[37m{{type}}\x1b[0m {route} {c}{text}{sc}");
+    style.set_date_style(DateStyle::HourMinuteSecond);
+
+    // define the new style
+    smol::block_on(async { logger.set_style(style).await; });
 
     smol::block_on(async {
         logger.set_global_stream(std::io::stdout()).await;

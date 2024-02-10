@@ -13,6 +13,7 @@ pub mod fmt;
 use std::collections::HashMap;
 use std::error::Error;
 use std::io::Write;
+use std::ops::Deref;
 use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
@@ -43,7 +44,7 @@ pub struct Logger {
     handle: JoinHandle<()>,
 
     immediate_flush: bool,
-    formatter: Arc<fmt::Fmt>
+    formatter: Arc<RwLock<fmt::Fmt>>
 }
 
 impl Logger {
@@ -55,7 +56,7 @@ impl Logger {
         let (sender, receiver) = smol::channel::unbounded::<Log>();
         let streams = Arc::new(RwLock::new(HashMap::new()));
         let rules = Arc::new(RwLock::new(Rules::default()));
-        let fmt = Arc::new(fmt::Fmt::default());
+        let fmt = Arc::new(RwLock::new(fmt::Fmt::default()));
 
         // spawn a new task to handle the logs that are sent to the logger
 
@@ -99,11 +100,25 @@ impl Logger {
         }
     }
 
+    /// Get the style of the logger.
+    pub async fn get_style(&self) -> fmt::Style {
+        self.formatter.read().await.get_style().clone()
+    }
+
+    /// Set the style of the logger.
+    pub async fn set_style(&mut self, style: fmt::Style) {
+        self.formatter.write().await.set_style(style);
+    }
+
+    /// Stops the logger and waits for it to finish.
+    ///
+    /// This function takes ownership of the logger, and returns the result of the thread. (if the logger was stopped successfully)
     pub fn stop(self) -> thread::Result<()> {
         self.sender.close();
         self.handle.join()
     }
 
+    /// Send a log to the logger.
     pub async fn send_log(&self, log: Log) {
         if let Err(e) = self.sender.send(log).await {
             eprintln!("Error sending log: {e:#?}, {}", e);

@@ -9,7 +9,7 @@ use crate::rules::Rules;
 pub(crate) async fn run(
     streams_arc: Arc<RwLock<HashMap<StreamID, Stream>>>,
     rules: Arc<RwLock<Rules>>,
-    fmt: Arc<Fmt>,
+    fmt: Arc<RwLock<Fmt>>,
     log: Log
 ) {
     let rules = rules.read().await;
@@ -25,7 +25,9 @@ pub(crate) async fn run(
         let mut streams = streams_arc.write().await;
         // write to global stream
         if let Some(stream) = streams.get_mut(GLOBAL_STREAM_ID) {
+            let fmt = fmt.read().await;
             formatted = fmt.format(&log);
+            drop(fmt);
             is_formatted = true;
 
             // write to the stream with \n at the end
@@ -52,7 +54,9 @@ pub(crate) async fn run(
         // if the conditions above aren't met, write to the stream
 
         if !is_formatted {
+            let fmt = fmt.read().await;
             formatted = fmt.format(&log);
+            drop(fmt);
             is_formatted = true;
         }
 
