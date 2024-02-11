@@ -34,6 +34,7 @@ pub enum ParserErrorId {
     InvStr,
     /// for all error that don't have an id to report
     Unknown,
+    TimedOut,
 }
 
 impl ParserErrorId {
@@ -48,6 +49,7 @@ impl ParserErrorId {
             ParserErrorId::InvNum => "Invalid number: expected {1} bytes, found {2}.",
             ParserErrorId::InvDataLen => "Invalid length header, data length mismatch it.",
             ParserErrorId::InvStr => "Invalid utf-8 string.",
+            ParserErrorId::TimedOut => "Took to long to gather the rest of the packet, usually means that it's corrupted",
             ParserErrorId::Unknown => "{1}",
         }
     }
@@ -65,6 +67,7 @@ impl ParserErrorId {
             "INV_NUM" => Some(ParserErrorId::InvNum),
             "INV_DATA_LEN" => Some(ParserErrorId::InvDataLen),
             "INV_STR" => Some(ParserErrorId::InvStr),
+            "TIMEDOUT" => Some(ParserErrorId::TimedOut),
             "UNKNOWN" => Some(ParserErrorId::Unknown),
             _ => None,
         }
@@ -81,6 +84,7 @@ impl ParserErrorId {
             ParserErrorId::InvNum => "INV_NUM",
             ParserErrorId::InvDataLen => "INV_DATA_LEN",
             ParserErrorId::InvStr => "INV_STR",
+            ParserErrorId::TimedOut => "TIMEDOUT",
             ParserErrorId::Unknown => "UNKNOWN",
         }
     }
@@ -143,9 +147,9 @@ pub trait CspParser {
     /// ```rs
     /// let reader: &[u8] = &[1,2,3,4,5,6,7];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
+    ///
     /// assert_eq!(parser.pos(), 0);
-    /// 
+    ///
     /// parser.read(3);
     /// assert_eq!(parser.pos(), 3);
     /// ```
@@ -158,12 +162,12 @@ pub trait CspParser {
     /// ```rs
     /// let reader: &[u8] = &[1,2,3,4,5,6,7];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
+    ///
     /// assert_eq!(parser.pos(), 0);
-    /// 
+    ///
     /// parser.read(3);
     /// assert_eq!(parser.pos(), 3);
-    /// 
+    ///
     /// assert_eq!(parser.reset(), 3);
     /// assert_eq!(parser.pos(), 0);
     /// ```
@@ -215,13 +219,13 @@ impl<T: Read> Parser<T> {
     /// ```
     /// let reader: &[u8] = &[1,2,3,4,5,6,7];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
-    /// assert_eq!(parser.read(3), vec![1,2,3]);
-    /// assert_eq!(parser.read(2), vec![4,5]);
-    /// assert_eq!(parser.read(20), vec![6,7]);
-    /// assert_eq!(parser.read(2), vec![]);
+    ///
+    /// assert_eq!(parser.read(3).unwrap(), vec![1,2,3]);
+    /// assert_eq!(parser.read(2).unwrap(), vec![4,5]);
+    /// assert_eq!(parser.read(20).unwrap(), vec![6,7]);
+    /// assert_eq!(parser.read(2).unwrap(), vec![]);
     /// ```
-    pub fn read(&mut self, size: usize) -> Vec<u8> {
+    pub fn read(&mut self, size: usize) -> ParseResult<Vec<u8>> {
         let mut buffer = vec![0; size];
 
         let mut slice = buffer.as_mut_slice();
@@ -237,6 +241,12 @@ impl<T: Read> Parser<T> {
                     slice = &mut tmp[n..];
                 }
                 Err(e) if e.kind() == io::ErrorKind::Interrupted => {}
+                Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
+                    // normally implemented where timout of reader.set_read_timout() hit
+                    // on a parser, it indicate that we should not wait for more data as it'll likelly not come
+                    // (at least for the current packet)
+                    return Err(ParserError::new(ParserErrorId::TimedOut, self.pos()));
+                }
                 Err(e) => {
                     // TODO: use a proper logger
                     eprint!("got {:?} when attempt to read buffer", e);
@@ -247,21 +257,21 @@ impl<T: Read> Parser<T> {
         }
 
         buffer.resize(s, 0);
-        return buffer;
+        return Ok(buffer);
     }
-    
+
     /// read exactly one byte
     ///
     /// # Example
     /// ```
     /// let reader: &[u8] = &[1];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
+    ///
     /// assert_eq!(parser.read_byte(), Ok(1));
     /// assert_eq!(parser.read_byte().unwrap_err().id, csp::parser::ParserErrorId::UkwnHeader);
     /// ```
     pub fn read_byte(&mut self) -> ParseResult<u8> {
-        let buf = self.read(1);
+        let buf = self.read(1)?;
         if buf.len() == 0 {
             let mut error = ParserError::new(ParserErrorId::UkwnHeader, self.pos());
             error.set_desc("{1}", "EOF");
@@ -277,7 +287,7 @@ impl<T: Read> Parser<T> {
     /// ```
     /// let reader: &[u8] = &[3, 49, 46, 48, 46, 51, 4];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
+    ///
     /// assert_eq!(parser.read_string(), Ok("1.0.3".to_string()));
     /// ```
     pub fn read_string(&mut self) -> ParseResult<String> {
@@ -285,7 +295,7 @@ impl<T: Read> Parser<T> {
         let mut start = false;
 
         loop {
-            let buf = self.read(1);
+            let buf = self.read(1)?;
 
             if buf.len() == 0 {
                 let mut error = ParserError::new(ParserErrorId::MissCtrl, self.pos());
@@ -326,11 +336,11 @@ impl<T: Read> Parser<T> {
     /// ```
     /// let reader: &[u8] = &[16, 4, 0, 0, 2];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
+    ///
     /// assert_eq!(parser.read_u32(), Ok(1040));
     /// ```
     pub fn read_u32(&mut self) -> ParseResult<u32> {
-        let mut buf = self.read(4);
+        let mut buf = self.read(4)?;
         if buf.len() < 4 {
             let mut error = ParserError::new(ParserErrorId::InvNum, self.pos());
             error.set_desc("{1}", "4");
@@ -349,11 +359,11 @@ impl<T: Read> Parser<T> {
     /// ```
     /// let reader: &[u8] = &[16, 4, 0, 0, 1, 0, 0, 0];
     /// let mut parser = csp::parser::Parser::new(reader);
-    /// 
+    ///
     /// assert_eq!(parser.read_u64(), Ok(4294968336));
     /// ```
     pub fn read_u64(&mut self) -> ParseResult<u64> {
-        let mut buf = self.read(8);
+        let mut buf = self.read(8)?;
         if buf.len() < 8 {
             let mut error = ParserError::new(ParserErrorId::InvNum, self.pos());
             error.set_desc("{1}", "8");
@@ -427,7 +437,7 @@ impl<T: AsyncRead + std::marker::Unpin> AsyncParser<T> {
     /// smol::block_on( async {
     ///     let reader: &[u8] = &[1,2,3,4,5,6,7];
     ///     let mut parser = csp::parser::AsyncParser::new(reader);
-    /// 
+    ///
     ///     assert_eq!(parser.read(3).await, vec![1,2,3]);
     ///     assert_eq!(parser.read(2).await, vec![4,5]);
     ///     assert_eq!(parser.read(20).await, vec![6,7]);
@@ -456,6 +466,7 @@ impl<T: AsyncRead + std::marker::Unpin> AsyncParser<T> {
                     // TODO: use a proper logger
                     eprint!("got {:?} when attempt to read buffer", e);
                     // FIXME: handle error, but what kind of error should we expect...?
+                    // TODO: add timedout error
                     s = 0;
                 }
             };
@@ -472,7 +483,7 @@ impl<T: AsyncRead + std::marker::Unpin> AsyncParser<T> {
     /// smol::block_on( async {
     ///     let reader: &[u8] = &[1];
     ///     let mut parser = csp::parser::AsyncParser::new(reader);
-    /// 
+    ///
     ///     assert_eq!(parser.read_byte().await, Ok(1));
     ///     assert_eq!(parser.read_byte().await.unwrap_err().id, csp::parser::ParserErrorId::UkwnHeader);
     /// } )
@@ -495,7 +506,7 @@ impl<T: AsyncRead + std::marker::Unpin> AsyncParser<T> {
     /// smol::block_on( async {
     ///     let reader: &[u8] = &[3, 49, 46, 48, 46, 51, 4];
     ///     let mut parser = csp::parser::AsyncParser::new(reader);
-    /// 
+    ///
     ///     assert_eq!(parser.read_string().await, Ok("1.0.3".to_string()));
     /// } )
     /// ```
@@ -546,7 +557,7 @@ impl<T: AsyncRead + std::marker::Unpin> AsyncParser<T> {
     /// smol::block_on( async {
     ///     let reader: &[u8] = &[16, 4, 0, 0, 2];
     ///     let mut parser = csp::parser::AsyncParser::new(reader);
-    /// 
+    ///
     ///     assert_eq!(parser.read_u32().await, Ok(1040));
     /// } )
     /// ```
@@ -571,7 +582,7 @@ impl<T: AsyncRead + std::marker::Unpin> AsyncParser<T> {
     /// smol::block_on( async {
     ///     let reader: &[u8] = &[16, 4, 0, 0, 1, 0, 0, 0];
     ///     let mut parser = csp::parser::AsyncParser::new(reader);
-    /// 
+    ///
     ///     assert_eq!(parser.read_u64().await, Ok(4294968336));
     /// } )
     /// ```
@@ -612,18 +623,18 @@ mod tests {
 
         let mut parser = Parser::new(reader);
 
-        assert_eq!(parser.read(2), vec![1, 2]);
+        assert_eq!(parser.read(2).unwrap(), vec![1, 2]);
         assert_eq!(2, parser.pos());
 
-        assert_eq!(parser.read(3), vec![3, 4, 5]);
+        assert_eq!(parser.read(3).unwrap(), vec![3, 4, 5]);
         assert_eq!(5, parser.pos());
 
         assert_eq!(5, parser.reset());
 
-        assert_eq!(parser.read(20), vec![6, 7, 8, 9, 10]);
+        assert_eq!(parser.read(20).unwrap(), vec![6, 7, 8, 9, 10]);
         assert_eq!(5, parser.pos());
 
-        assert_eq!(parser.read(2), vec![]);
+        assert_eq!(parser.read(2).unwrap(), vec![]);
         assert_eq!(5, parser.pos());
     }
 
@@ -692,7 +703,7 @@ mod tests {
 
     #[test]
     fn async_parser_read() {
-        smol::block_on( async {
+        smol::block_on(async {
             let reader: &[u8] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
             let mut parser = AsyncParser::new(reader);
@@ -715,21 +726,21 @@ mod tests {
 
     #[test]
     fn asnyc_parser_parse_byte() {
-        smol::block_on( async {
-                let reader: &[u8] = &[32];
+        smol::block_on(async {
+            let reader: &[u8] = &[32];
 
-                let mut parser = AsyncParser::new(reader);
-                assert_eq!(parser.read_byte().await, Ok(32));
-                assert_eq!(
-                    parser.read_byte().await.unwrap_err().id,
-                    ParserErrorId::UkwnHeader
-                );
+            let mut parser = AsyncParser::new(reader);
+            assert_eq!(parser.read_byte().await, Ok(32));
+            assert_eq!(
+                parser.read_byte().await.unwrap_err().id,
+                ParserErrorId::UkwnHeader
+            );
         })
     }
 
     #[test]
     fn async_parser_parse_string() {
-        smol::block_on( async {
+        smol::block_on(async {
             let reader1: &[u8] = &[3, 49, 46, 48, 46, 51, 4];
             let reader2: &[u8] = &[3, 195, 169, 4];
             let reader3: &[u8] = &[49, 46, 48, 46, 51, 4];
@@ -752,13 +763,16 @@ mod tests {
                 parser4.read_string().await.unwrap_err().id,
                 ParserErrorId::MissCtrl
             );
-            assert_eq!(parser5.read_string().await.unwrap_err().id, ParserErrorId::InvStr);
+            assert_eq!(
+                parser5.read_string().await.unwrap_err().id,
+                ParserErrorId::InvStr
+            );
         })
     }
 
     #[test]
     fn async_parser_parse_u32() {
-        smol::block_on( async {
+        smol::block_on(async {
             let reader1: &[u8] = &[11, 0, 45, 05];
             let reader2: &[u8] = &[22, 05, 0];
 
@@ -766,13 +780,16 @@ mod tests {
             let mut parser2 = AsyncParser::new(reader2);
 
             assert_eq!(parser1.read_u32().await, Ok(86835211));
-            assert_eq!(parser2.read_u32().await.unwrap_err().id, ParserErrorId::InvNum);
+            assert_eq!(
+                parser2.read_u32().await.unwrap_err().id,
+                ParserErrorId::InvNum
+            );
         })
     }
 
     #[test]
     fn async_parser_parse_u64() {
-        smol::block_on( async {
+        smol::block_on(async {
             let reader1: &[u8] = &[11, 0, 45, 05, 0, 3, 0, 0];
             let reader2: &[u8] = &[22, 05, 0, 0, 5, 33];
 
@@ -780,8 +797,10 @@ mod tests {
             let mut parser2 = AsyncParser::new(reader2);
 
             assert_eq!(parser1.read_u64().await, Ok(3298621718539));
-            assert_eq!(parser2.read_u64().await.unwrap_err().id, ParserErrorId::InvNum);
+            assert_eq!(
+                parser2.read_u64().await.unwrap_err().id,
+                ParserErrorId::InvNum
+            );
         })
     }
-
 }
