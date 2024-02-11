@@ -37,6 +37,7 @@ local err_id = {
   invalid_number = "INV_NUM",
   invalid_data_length = "INV_DATA_LEN",
   invalid_string = "INV_STR",
+  timed_out = "TIMEDOUT",
 
   unknown = "UNKNOWN",
 }
@@ -52,6 +53,7 @@ local err_msg = {
   [err_id.invalid_number] = "Invalid number: expected %d bytes, found %d.",
   [err_id.invalid_data_length] = "Invalid length header, data length mismatch it.",
   [err_id.invalid_string] = "Invalid utf-8 string.",
+  [err_id.timed_out] = "Took to long to gather the rest of the packet, usually means that it's corrupted"
 }
 
 
