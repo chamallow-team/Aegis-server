@@ -1,3 +1,6 @@
+//! This module define missiles
+
+
 use serde::{Deserialize, Serialize};
 use crate::{Damages, Speed, WeaponInformations};
 
