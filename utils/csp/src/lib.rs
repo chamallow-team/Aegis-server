@@ -969,15 +969,14 @@ impl Packet {
 
         if !matches!(self.get_header("length"), None) {
             match parser.read_byte() {
-                Ok(b) if b == Control::DataStart.into() => {},
+                Ok(b) if b == Control::DataStart.into() => {}
                 _ => {
-                    let mut error =
-                        ParserError::new(ParserErrorId::MissCtrl, parser.pos());
+                    let mut error = ParserError::new(ParserErrorId::MissCtrl, parser.pos());
                     error.set_desc("{1}", Control::DataStart.to_string());
                     return Err(error);
                 }
             }
-            
+
             let mut length: u64 = self
                 .get_header("length")
                 .unwrap_or(Header::Length(0))
@@ -990,7 +989,7 @@ impl Packet {
                 if length < chunk_size {
                     chunk_size = length;
                 }
-                let chunk = parser.read(chunk_size as usize);
+                let chunk = parser.read(chunk_size as usize)?;
                 if chunk.len() as u64 != chunk_size {
                     let error = ParserError::new(ParserErrorId::InvDataLen, parser.pos());
                     return Err(error);
@@ -1100,15 +1099,14 @@ impl Packet {
 
         if !matches!(self.get_header("length"), None) {
             match parser.read_byte().await {
-                Ok(b) if b == Control::DataStart.into() => {},
+                Ok(b) if b == Control::DataStart.into() => {}
                 _ => {
-                    let mut error =
-                        ParserError::new(ParserErrorId::MissCtrl, parser.pos());
+                    let mut error = ParserError::new(ParserErrorId::MissCtrl, parser.pos());
                     error.set_desc("{1}", Control::DataStart.to_string());
                     return Err(error);
                 }
             }
-            
+
             let mut length: u64 = self
                 .get_header("length")
                 .unwrap_or(Header::Length(0))
