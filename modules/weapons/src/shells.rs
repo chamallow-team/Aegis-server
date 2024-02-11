@@ -1,3 +1,5 @@
+//! This module define shells used in tanks and armored vehicles.
+
 use serde::{Deserialize, Serialize};
 use crate::{Damages, WeaponInformations};
 
@@ -72,6 +74,7 @@ impl TryFrom<i64> for ShellType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct Shell {
     shell_type: ShellType,
+
     informations: WeaponInformations,
     damages: Damages
 }
@@ -249,7 +252,7 @@ mod test {
     #[cfg(feature = "load_configuration")]
     #[test]
     fn load_config(){
-        let mut p = env::current_dir().unwrap();
+        let mut p = std::env::current_dir().unwrap();
         p.push("../../data/config/weapons");
 
         let store = crate::loader::load(p).unwrap();
