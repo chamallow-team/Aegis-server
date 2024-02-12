@@ -1,14 +1,18 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 pub mod missiles;
 pub mod shells;
 pub mod torpedo;
 pub mod bullets;
+pub mod firearm;
 
 /// Speed in meters per second
 ///
 /// If the speed is negative, the damage will be instantly applied
 pub type Speed = f32;
+
+pub type WeaponID = Uuid;
 
 /// Define the damages that a weapon can do
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, PartialOrd, Copy)]
