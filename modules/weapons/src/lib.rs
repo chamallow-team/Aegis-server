@@ -1,3 +1,5 @@
+#[cfg_attr(feature = "load_configuration", deprecated(note = "This feature will be progressively changed to another implementation"))]
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
