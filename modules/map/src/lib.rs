@@ -2,10 +2,11 @@ mod exported;
 
 use petgraph::Graph;
 use petgraph::prelude::NodeIndex;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::exported::{ExportedEdge, ExportedMap, ExportedNode};
 
-#[derive(Debug, Clone, Default, Eq, PartialEq, Ord, PartialOrd, Copy)]
+#[derive(Debug, Clone, Default, Eq, PartialEq, Ord, PartialOrd, Copy, Serialize, Deserialize)]
 pub struct Coordinates(i64, i64);
 
 impl Coordinates {
@@ -30,13 +31,13 @@ impl From<(usize, usize)> for Coordinates {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum NodeType {
     Land(NodeLandType),
     Water
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum NodeLandType {
     Plain = 0,
     Forest = 1,

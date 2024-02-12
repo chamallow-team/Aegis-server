@@ -1,7 +1,8 @@
 use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 use crate::{Coordinates, NodeType};
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct ExportedNode {
     id: Uuid,
     node_type: NodeType,
@@ -18,7 +19,7 @@ impl ExportedNode {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct ExportedEdge {
     source_id: Uuid,
     target_id: Uuid,
@@ -30,7 +31,7 @@ impl ExportedEdge {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ExportedMap {
     nodes: Vec<ExportedNode>,
     edges: Vec<ExportedEdge>,
