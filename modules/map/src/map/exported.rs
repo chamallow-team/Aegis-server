@@ -1,6 +1,6 @@
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
-use crate::{Coordinates, NodeType};
+use super::{Coordinates, NodeType};
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct ExportedNode {
@@ -54,8 +54,8 @@ impl ExportedMap {
 #[cfg(test)]
 mod exported_map_tests {
     use uuid::Uuid;
-    use crate::exported::{ExportedEdge, ExportedMap, ExportedNode};
-    use crate::NodeType;
+    use super::{ExportedEdge, ExportedMap, ExportedNode};
+    use crate::map::NodeType;
 
     #[test]
     fn empty_exported_map(){
