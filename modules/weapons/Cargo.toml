@@ -8,6 +8,4 @@ edition = "2021"
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
 toml = { workspace = true }
-
-[features]
-load_configuration = []
+uuid = { workspace = true, features = ["v4"] }
