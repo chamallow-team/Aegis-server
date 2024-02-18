@@ -9,6 +9,3 @@ edition = "2021"
 serde = { workspace = true, features = ["derive"] }
 toml = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
-
-[features]
-load_configuration = []
