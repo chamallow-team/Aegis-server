@@ -50,7 +50,7 @@ impl From<NodeLandType> for NodeType {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct Node {
     id: Uuid,
     node_type: NodeType,
@@ -67,7 +67,7 @@ impl Node {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Edge(Uuid, Uuid);
 
 impl From<(Uuid, Uuid)> for Edge {
@@ -76,12 +76,12 @@ impl From<(Uuid, Uuid)> for Edge {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct Map {
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GameMap {
     graph: Graph<Node, Edge>
 }
 
-impl Map {
+impl GameMap {
     pub fn add_node(&mut self, node: impl Into<Node>) -> NodeIndex {
         self.graph.add_node(node.into())
     }
@@ -163,11 +163,11 @@ impl Map {
 #[cfg(test)]
 mod map_tests {
     use uuid::Uuid;
-    use super::{Edge, Map, Node, NodeLandType, NodeType};
+    use super::{Edge, GameMap, Node, NodeLandType, NodeType};
 
     #[test]
     fn one_node_graph(){
-        let mut m = Map::default();
+        let mut m = GameMap::default();
 
         let id = Uuid::new_v4();
         let n = Node::new(NodeType::Water, (6, 5), id);
@@ -178,7 +178,7 @@ mod map_tests {
 
     #[test]
     fn simple_graph(){
-        let mut m = Map::default();
+        let mut m = GameMap::default();
 
         let ids = [Uuid::new_v4(), Uuid::new_v4(), Uuid::new_v4()];
 
