@@ -10,5 +10,12 @@ uuid = { workspace = true, features = ["fast-rng", "v4", "serde"] }
 petgraph = { workspace = true, features = ["serde", "serde-1", "serde_derive"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-msgpack_simple = { worskpace = true }
+log = { workspace = true }
 weapons = { path = "../weapons" }
+
+flate2 = { workspace = true, optional = true }
+rmp-serde = { workspace = true, optional = true }
+tar = { workspace = true, optional = true }
+
+[features]
+save = ["dep:flate2", "dep:rmp-serde", "dep:tar"]

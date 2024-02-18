@@ -4,9 +4,11 @@ use crate::extensions::{Extension, ExtensionID};
 
 pub mod map;
 pub mod extensions;
+#[cfg(feature = "save")]
+pub mod save;
 
 /// Contain the full map, with the points, units, weapons, extensions and so on.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Map {
     map: map::GameMap,
     extensions: HashMap<ExtensionID, Extension>
