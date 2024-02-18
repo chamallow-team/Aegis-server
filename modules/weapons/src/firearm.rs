@@ -1,9 +1,10 @@
-
+use serde::{Deserialize, Serialize};
 use crate::WeaponID;
 use crate::{Damages, WeaponInformations};
 
 /// Enumeration representing different types of firearms.
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum FireArmType {
     /// Hand-held firearm used at short distances, typically operated with one hand.
     ///
@@ -23,7 +24,7 @@ pub enum FireArmType {
     PrecisionRifle = 5,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct FireArm {
     /// Contain a list of IDs to get the allowed bullets
     allowed_bullets: Vec<WeaponID>,
@@ -96,7 +97,7 @@ impl FireArm {
     /// use uuid::Uuid;
     /// use weapons::firearm::{FireArm, FireArmType};
     ///
-    /// let default = Uuid::new_v4();
+    /// let default = "abc".to_string();
     ///
     /// let firearm = FireArm::new(FireArmType::Assault, default.clone());
     /// assert_eq!(firearm.get_default_bullet(), &default);
@@ -113,12 +114,12 @@ impl FireArm {
     /// use uuid::Uuid;
     /// use weapons::firearm::{FireArm, FireArmType};
     ///
-    /// let default = Uuid::new_v4();
+    /// let default = "abc".to_string();
     ///
     /// let mut firearm = FireArm::new(FireArmType::Assault, default.clone());
     /// assert_eq!(firearm.get_default_bullet(), &default);
     ///
-    /// let default2 = Uuid::new_v4();
+    /// let default2 = "abc".to_string();
     ///
     /// firearm.set_default_bullet(default2.clone());
     /// assert_eq!(firearm.get_default_bullet(), &default2);
@@ -134,9 +135,10 @@ impl FireArm {
     /// ```
     /// use uuid::Uuid;
     /// use weapons::firearm::{FireArm, FireArmType};
+    /// use weapons::WeaponID;
     ///
-    /// let firearm = FireArm::new(FireArmType::Assault, Uuid::new_v4());
-    /// assert_eq!(firearm.get_allowed_bullets(), &Vec::new());
+    /// let firearm = FireArm::new(FireArmType::Assault, "Famas");
+    /// assert_eq!(firearm.get_allowed_bullets(), &Vec::<WeaponID>::new());
     /// ```
     pub fn get_allowed_bullets(&self) -> &Vec<WeaponID> {
         &self.allowed_bullets
@@ -149,9 +151,10 @@ impl FireArm {
     /// ```
     /// use uuid::Uuid;
     /// use weapons::firearm::{FireArm, FireArmType};
+    /// use weapons::WeaponID;
     ///
     /// let mut firearm = FireArm::new(FireArmType::Assault, Uuid::new_v4());
-    /// assert_eq!(firearm.get_allowed_bullets_mut(), &mut Vec::new());
+    /// assert_eq!(firearm.get_allowed_bullets_mut(), &mut Vec::<WeaponID>::new());
     /// ```
     pub fn get_allowed_bullets_mut(&mut self) -> &mut Vec<WeaponID> {
         &mut self.allowed_bullets
@@ -165,8 +168,8 @@ impl FireArm {
     /// use uuid::Uuid;
     /// use weapons::firearm::{FireArm, FireArmType};
     ///
-    /// let mut firearm = FireArm::new(FireArmType::Assault, Uuid::new_v4());
-    /// let allowed_bullet = Uuid::new_v4();
+    /// let mut firearm = FireArm::new(FireArmType::Assault, "Famas".to_string());
+    /// let allowed_bullet = "abc".to_string();
     /// firearm.add_allowed_bullet(allowed_bullet.clone());
     /// assert_eq!(firearm.get_allowed_bullets(), &vec![allowed_bullet]);
     /// ```
@@ -184,15 +187,16 @@ impl FireArm {
     /// ```
     /// use uuid::Uuid;
     /// use weapons::firearm::{FireArm, FireArmType};
+    /// use weapons::WeaponID;
     ///
     /// let mut firearm = FireArm::new(FireArmType::Assault, Uuid::new_v4());
-    /// let allowed_bullet = Uuid::new_v4();
+    /// let allowed_bullet = "abc".to_string();
     ///
     /// firearm.add_allowed_bullet(allowed_bullet.clone());
     /// assert_eq!(firearm.get_allowed_bullets(), &vec![allowed_bullet.clone()]);
     ///
     /// firearm.remove_allowed_bullet(allowed_bullet);
-    /// assert_eq!(firearm.get_allowed_bullets(), &vec![]);
+    /// assert_eq!(firearm.get_allowed_bullets(), &Vec::<WeaponID>::new());
     /// ```
     pub fn remove_allowed_bullet(&mut self, id: impl Into<WeaponID>) {
         let a = id.into();

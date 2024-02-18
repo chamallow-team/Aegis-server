@@ -5,6 +5,7 @@ use crate::{Damages, WeaponInformations};
 
 /// Enumeration representing different types of propulsion for torpedoes.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Copy, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum PropulsionType {
     /// Standard propulsion method.
     Standard = 0,
@@ -30,6 +31,7 @@ impl TryFrom<i64> for PropulsionType {
 
 /// Enumeration representing different types of guidance systems for torpedoes.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Copy, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum GuidanceType {
     /// No sonar, follows a linear trajectory.
     Simple = 0,
@@ -56,7 +58,7 @@ impl TryFrom<i64> for GuidanceType {
 }
 
 /// A torpedo object
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Torpedo {
     guidance: GuidanceType,
     propulsion: PropulsionType,

@@ -5,6 +5,7 @@ use crate::{Damages, WeaponInformations};
 
 /// The type of shell
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, PartialOrd, Copy)]
+#[repr(u8)]
 pub enum ShellType {
     /// Armor-piercing shell, will penetrate armor and explode inside the target
     ///

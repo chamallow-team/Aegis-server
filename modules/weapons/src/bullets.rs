@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{Damages, WeaponInformations};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[repr(u8)]
 /// Enumeration representing different types of bullets.
 pub enum BulletType {
     /// Full Metal Jacket (FMJ): The bullet is encased in a metallic jacket to enhance penetration and reduce barrel fouling.
@@ -47,7 +48,7 @@ impl TryFrom<i64> for BulletType {
 }
 
 /// Implement a bullet
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Bullet {
     bullet_type: BulletType,
 

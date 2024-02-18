@@ -6,6 +6,7 @@ use crate::{Damages, Speed, WeaponInformations};
 
 /// The projectile type is the type of trajectory the missile will be using
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum ProjectileType {   
     /// The missile is guided by a human operator
     ///
@@ -33,6 +34,7 @@ impl TryFrom<i64> for ProjectileType {
 
 /// The missile guidance type is the type of guidance that is used in the missile
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum MissileGuidanceType {
     /// The missile is guided by a human operator
     Laser = 0,
@@ -63,6 +65,7 @@ impl TryFrom<i64> for MissileGuidanceType {
 
 /// The warhead type is the type of warhead that is used in the missile
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum WarheadType {
     /// Cruise missile
     Cruise = 0,
@@ -105,6 +108,7 @@ impl TryFrom<i64> for WarheadType {
 
 /// The warhead charge is the type of explosive charge that is used in the warhead
 #[derive(Clone, Default, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum WarheadCharge {
     /// A standard explosive charge
     #[default]
@@ -139,7 +143,7 @@ pub type WarheadCount = u32;
 /// This instance can be used in two ways:
 /// - Represent a missile that is fired by a unit
 /// - Represent a missile for its information, such as in the research tree
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Missile {
     /// The guidance type of the missile
     guidance: MissileGuidanceType,
