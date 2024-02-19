@@ -1,8 +1,12 @@
+//! This module define missiles
+
+
 use serde::{Deserialize, Serialize};
 use crate::{Damages, Speed, WeaponInformations};
 
 /// The projectile type is the type of trajectory the missile will be using
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum ProjectileType {   
     /// The missile is guided by a human operator
     ///
@@ -30,6 +34,7 @@ impl TryFrom<i64> for ProjectileType {
 
 /// The missile guidance type is the type of guidance that is used in the missile
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum MissileGuidanceType {
     /// The missile is guided by a human operator
     Laser = 0,
@@ -60,6 +65,7 @@ impl TryFrom<i64> for MissileGuidanceType {
 
 /// The warhead type is the type of warhead that is used in the missile
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum WarheadType {
     /// Cruise missile
     Cruise = 0,
@@ -102,6 +108,7 @@ impl TryFrom<i64> for WarheadType {
 
 /// The warhead charge is the type of explosive charge that is used in the warhead
 #[derive(Clone, Default, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum WarheadCharge {
     /// A standard explosive charge
     #[default]
@@ -136,7 +143,7 @@ pub type WarheadCount = u32;
 /// This instance can be used in two ways:
 /// - Represent a missile that is fired by a unit
 /// - Represent a missile for its information, such as in the research tree
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Missile {
     /// The guidance type of the missile
     guidance: MissileGuidanceType,
@@ -613,103 +620,5 @@ mod test {
         assert_eq!(missile.get_damages().submarine, 9.0);
         assert_eq!(missile.get_damages().missile, 10.0);
         assert_eq!(missile.get_damages().satellite, 11.0);
-    }
-}
-
-#[cfg(feature = "load_configuration")]
-pub(crate) mod loader {
-    use std::{fs, io};
-    use std::path::PathBuf;
-    use toml::{Table, Value};
-    use crate::loader::{parse_damages, parse_weapons_information, WeaponsStore};
-    use crate::missiles::{Missile, MissileGuidanceType, ProjectileType, WarheadCharge, WarheadType};
-
-    pub(crate) fn read_missiles(dir: PathBuf, store: &mut WeaponsStore) -> io::Result<()> {
-        let content = fs::read_to_string(&dir)?;
-
-        let table = match toml::from_str::<Table>(content.as_str()) {
-            Ok(table) => table,
-            Err(e) => {
-                // TODO use a proper logging method
-                println!("\x1b[33mWarning: cannot parse the toml content at {dir:?}: {e:?}\x1b[0m");
-                return Ok(())
-            }
-        };
-
-        for (k, v) in table.iter() {
-            if !v.is_table() {
-                // TODO use a proper logging method
-                println!("\x1b[33mWarning: the value of the key {k:?} at {dir:?} is not a table\x1b[0m");
-                continue;
-            }
-
-            if let Some(m) = parse_missile(&dir, v.as_table().unwrap()) {
-                store.missiles.insert(k.into(), m);
-            }
-        }
-
-        Ok(())
-    }
-
-    const UNWANTED_KEYS: &[&str] = &["guidance", "projectile", "hypersonic", "warhead", "warhead_charge", "warhead_count"];
-
-    fn parse_missile(dir: &PathBuf, t: &Table) -> Option<Missile> {
-        let guidance = MissileGuidanceType::try_from(
-            get_type(t, "guidance", dir)?.as_integer()?
-        ).ok()?;
-        let projectile = ProjectileType::try_from(
-            get_type(t, "projectile", dir)?.as_integer()?
-        ).ok()?;
-        let hypersonic = get_type(t, "hypersonic", dir)?.as_bool()?;
-        let warhead = WarheadType::try_from(
-            get_type(t, "warhead", dir)?.as_integer()?
-        ).ok()?;
-        let warhead_charge = WarheadCharge::try_from(
-            get_type(t, "warhead_charge", dir)?.as_integer()?
-        ).ok()?;
-        let warhead_count = get_type(t, "warhead_count", dir)?.as_integer()? as u32;
-
-        let mut missile = Missile::new(guidance, projectile);
-        missile.set_hypersonic(hypersonic);
-        missile.set_warhead_type(warhead);
-        missile.set_warhead_charge(warhead_charge);
-        missile.set_warhead_count(warhead_count);
-
-        for (k, v) in t.iter().filter(|(k, _)| !UNWANTED_KEYS.contains(&k.to_lowercase().as_str())) {
-            match k.as_str() {
-                "informations" => match parse_weapons_information(v) {
-                    Ok(t) => missile.set_informations(t),
-                    Err(e) => {
-                        // TODO use a proper logging method
-                        println!("\x1b[33mWarning: cannot parse the informations of the missile at {dir:?}: {e:?}\x1b[0m");
-                        return None;
-                    }
-                },
-                "damages" => match parse_damages(v) {
-                    Ok(d) => missile.set_damages(d),
-                    Err(e) => {
-                        // TODO use a proper logging method
-                        println!("\x1b[33mWarning: cannot parse the damages of the missile at {dir:?}: {e:?}\x1b[0m");
-                        return None;
-                    }
-                },
-                _ => {
-                    // TODO use a proper logging method
-                    println!("\x1b[33mWarning: the key {k:?} of the missile at {dir:?} is unknown\x1b[0m");
-                    continue;
-                }
-            }
-        }
-
-        Some(missile)
-    }
-
-    fn get_type<'a>(t: &'a Table, k: &str, dir: &PathBuf) -> Option<&'a Value> {
-        if !t.contains_key(k) {
-            // TODO use a proper logging method
-            println!("\x1b[33mWarning: the missile at {dir:?} does not have a key for {k:?}\x1b[0m");
-            return None;
-        }
-        Some(t.get(k).unwrap())
     }
 }
