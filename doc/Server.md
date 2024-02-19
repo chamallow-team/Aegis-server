@@ -21,4 +21,4 @@ FIXME : MASTER and SLAVES servers for load balancing huge servers hub
 
 ## communication protocols
 All communications are made trough custom protocoles over TCP/UDP or thread-channels.
-- [Client-Server Protocol](./csp/v1.0.md)
+- [Client-Server Protocol](./csp/index.md)
