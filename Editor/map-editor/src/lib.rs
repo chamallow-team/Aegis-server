@@ -11,3 +11,8 @@ extern "C" {
 pub fn greet() {
     alert("Hello, map-editor!");
 }
+
+#[wasm_bindgen]
+pub struct Map {
+    map: map::Map
+}

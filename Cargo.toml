@@ -4,7 +4,7 @@ members = [
     "modules/database",
     "modules/diplomacy",
     "modules/map",
-    "modules/map/MapEditor/map-editor",
+    "Editor/map-editor",
     "modules/market",
     "modules/resources",
     "modules/technology_tree",
