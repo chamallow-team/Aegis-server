@@ -65,9 +65,11 @@ nav a {
   right: var(--r, unset);
   left: var(--l, unset);
   bottom: var(--b, unset);
+  max-height: 100%;
+  height: var(--h, unset);
   width: var(--w, 300px);
   background: #0f172a;
-  padding: 10px;
+  padding: 10px 10px 5px 10px;
   border-radius: 7px;
   border: 1px solid #64748b;
 }
@@ -85,6 +87,11 @@ nav a {
 }
 #container .container .flying_box .head svg {
   transform: rotate(0deg);
+}
+#container .container .flying_box .body {
+  margin-top: 5px;
+  height: calc(100% - 2em - 20px);
+  overflow-y: scroll;
 }
 #container .container .flying_box:not(.open) .head {
   border-color: transparent;

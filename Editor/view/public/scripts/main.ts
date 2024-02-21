@@ -1,7 +1,5 @@
-import { Map } from './pkg/map_editor.js';
+import map_editor, { init } from './pkg/map_editor.js'
 import { init_flying_boxes } from './flying_box.js'
-
-let map = new Map();
 
 //
 //
@@ -38,6 +36,37 @@ function load_container_nav(){
 
 document.addEventListener("DOMContentLoaded", function(){
   load_container_nav();
-
   init_flying_boxes();
+
+
+  map_editor().then(init_map)
 })
+
+function init_map(){
+  let map = init();
+  console.log(map);
+
+  map.move_view(10, 0);
+
+  let canvas = document.getElementById("map_canvas") as HTMLCanvasElement;
+
+  // set the canvas size to the size of the container
+  let container = document.querySelector("#container .container#map");
+  let width = container.clientWidth;
+  let height = container.clientHeight;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  let resizeObserver = new ResizeObserver(function(entries){
+    // change the canvas size to the new size
+    let entry = entries[0];
+    let width = entry.contentRect.width;
+    let height = entry.contentRect.height;
+
+    canvas.width = width;
+    canvas.height = window.innerHeight;
+  });
+
+  resizeObserver.observe(container);
+}
