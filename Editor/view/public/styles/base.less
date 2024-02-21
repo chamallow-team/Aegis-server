@@ -1,0 +1,138 @@
+@import (css) url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+@import 'colors';
+
+body {
+  font-family: "Raleway", sans-serif;
+  font-optical-sizing: auto;
+  color: #fff;
+
+  background: @gray-800;
+  margin: 0;
+  padding: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+@navbar-width: 5em;
+
+nav {
+  background: @gray-900;
+
+  height: 100vh;
+  width: @navbar-width;
+
+  display: flex;
+  flex-direction: column;
+
+  .cases {
+    width: 100%;
+    height: calc(100% - 2em);
+
+    display: flex;
+    flex-direction: column;
+
+    svg {
+      fill: @slate-300;
+      width: 60%;
+      height: auto;
+
+      margin: 5px auto;
+      padding: 5px;
+
+      border: transparent solid 3px;
+
+      cursor: pointer;
+
+      transition: all 0.05s ease-in-out;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.6);
+        transition: all 0.05s ease-in-out;
+
+        border-color: @gray-700;
+        border-radius: 7px;
+      }
+    }
+  }
+
+  a {
+    margin: auto auto 10px auto;
+    text-align: center;
+
+    font-size: 0.9em;
+    text-decoration: none;
+    color: #d42741;
+    font-weight: 500;
+  }
+}
+
+#container {
+  width: calc(100vw - @navbar-width);
+  height: 100vh;
+
+  .container {
+    display: block;
+
+    &:not(.selected) {
+      display: none;
+    }
+
+    .flying_box {
+      position: absolute;
+      top: var(--t, unset);
+      right: var(--r, unset);
+      left: var(--l, unset);
+      bottom: var(--b, unset);
+
+      width: var(--w, 300px);
+      background: @slate-900;
+      padding: 10px;
+      border-radius: 7px;
+
+      border: 1px solid @slate-500;
+
+      .head {
+        user-select: none;
+
+        cursor: move;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        border-bottom: @gray-600 1px solid;
+
+        p {
+          @m: 10px;
+
+          margin: @m 0 @m 10px;
+          font-weight: 600;
+        }
+
+        svg {
+          transform: rotate(0deg);
+        }
+      }
+
+      &:not(.open) {
+        .head {
+          border-color: transparent;
+
+          svg {
+            transform: rotate(180deg);
+          }
+        }
+
+        .body {
+          display: none;
+        }
+      }
+    }
+  }
+}

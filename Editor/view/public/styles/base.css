@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+body {
+  font-family: "Raleway", sans-serif;
+  font-optical-sizing: auto;
+  color: #fff;
+  background: #1f2937;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+nav {
+  background: #111827;
+  height: 100vh;
+  width: 5em;
+  display: flex;
+  flex-direction: column;
+}
+nav .cases {
+  width: 100%;
+  height: calc(100% - 2em);
+  display: flex;
+  flex-direction: column;
+}
+nav .cases svg {
+  fill: #cbd5e1;
+  width: 60%;
+  height: auto;
+  margin: 5px auto;
+  padding: 5px;
+  border: transparent solid 3px;
+  cursor: pointer;
+  transition: all 0.05s ease-in-out;
+}
+nav .cases svg:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transition: all 0.05s ease-in-out;
+  border-color: #374151;
+  border-radius: 7px;
+}
+nav a {
+  margin: auto auto 10px auto;
+  text-align: center;
+  font-size: 0.9em;
+  text-decoration: none;
+  color: #d42741;
+  font-weight: 500;
+}
+#container {
+  width: calc(100vw - 5em);
+  height: 100vh;
+}
+#container .container {
+  display: block;
+}
+#container .container:not(.selected) {
+  display: none;
+}
+#container .container .flying_box {
+  position: absolute;
+  top: var(--t, unset);
+  right: var(--r, unset);
+  left: var(--l, unset);
+  bottom: var(--b, unset);
+  width: var(--w, 300px);
+  background: #0f172a;
+  padding: 10px;
+  border-radius: 7px;
+  border: 1px solid #64748b;
+}
+#container .container .flying_box .head {
+  user-select: none;
+  cursor: move;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-bottom: #4b5563 1px solid;
+}
+#container .container .flying_box .head p {
+  margin: 10px 0 10px 10px;
+  font-weight: 600;
+}
+#container .container .flying_box .head svg {
+  transform: rotate(0deg);
+}
+#container .container .flying_box:not(.open) .head {
+  border-color: transparent;
+}
+#container .container .flying_box:not(.open) .head svg {
+  transform: rotate(180deg);
+}
+#container .container .flying_box:not(.open) .body {
+  display: none;
+}
+/*# sourceMappingURL=base.css.map */

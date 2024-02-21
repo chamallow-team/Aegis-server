@@ -14,6 +14,8 @@ default = ["console_error_panic_hook"]
 wasm-bindgen = "0.2.84"
 console_error_panic_hook = { version = "0.1.7", optional = true }
 map = { path = "../../modules/map", features = ["save"] }
+# Required because the `wasm*-unknown-unknown` targets are not supported by default.
+getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
