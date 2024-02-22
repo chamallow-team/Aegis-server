@@ -17,12 +17,15 @@ body {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
+
+  overflow: hidden;
 }
 
 @navbar-width: 5em;
 
 nav {
   background: @gray-900;
+  z-index: 1000;
 
   height: 100vh;
   width: @navbar-width;
@@ -72,6 +75,70 @@ nav {
   }
 }
 
+.field {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+
+  margin: 5px;
+
+  label {
+    font-size: 0.9em;
+    font-weight: 200;
+  }
+
+  select {
+    background: @gray-700;
+    color: #fff;
+
+    padding: 0.5em 2.5em 0.5em 0.5em;
+
+    border: none;
+    margin: 0;
+
+    border-radius: 3px;
+    text-indent: 0.01px;
+
+    text-overflow: '';
+    -webkit-appearance: button;
+
+    cursor: pointer;
+
+    &[disabled] {
+      cursor: not-allowed;
+      background: @gray-700;
+      color: @gray-500;
+    }
+  }
+
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+}
+
+button {
+  background: @gray-700;
+  transition: background-color 0.1s ease-in-out;
+
+  color: #fff;
+  margin: 5px;
+  padding: 5px 10px;
+
+  font-weight: 500;
+
+  border: none;
+  border-radius: 3px;
+
+  cursor: pointer;
+
+  &:hover {
+    background: @gray-800;
+    transition: background-color 0.1s ease-in-out;
+  }
+}
+
 #container {
   width: calc(100vw - @navbar-width);
   height: 100vh;
@@ -85,6 +152,8 @@ nav {
 
     .flying_box {
       position: absolute;
+      z-index: 7;
+
       top: var(--t, unset);
       right: var(--r, unset);
       left: var(--l, unset);
@@ -142,6 +211,49 @@ nav {
         .body {
           display: none;
         }
+      }
+    }
+
+    .hover {
+      position: absolute;
+      z-index: 8;
+
+      top: var(--t, unset);
+      right: var(--r, unset);
+      left: var(--l, unset);
+      bottom: var(--b, unset);
+
+      min-width: 10px;
+      min-height: 10px;
+
+      padding: 5px;
+      background: @gray-900;
+
+      border-radius: 7px;
+      
+      .head {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        svg {
+          height: 1.5em;
+          width: auto;
+        }
+
+        p {
+          margin: 10px 5px;
+          font-weight: 500;
+        }
+
+        border-bottom: 1px solid @gray-500;
+      }
+
+      .body {
+        margin: 3px;
+
+        display: flex;
+        flex-direction: column;
       }
     }
   }

@@ -1,5 +1,6 @@
 import map_editor, { init } from './pkg/map_editor.js'
 import { init_flying_boxes } from './flying_box.js'
+import { init_listeners } from './map_listeners.js'
 
 //
 //
@@ -46,9 +47,10 @@ function init_map(){
   let map = init();
   console.log(map);
 
-  map.move_view(10, 0);
-
   let canvas = document.getElementById("map_canvas") as HTMLCanvasElement;
+
+  window['map'] = map;
+  init_listeners(canvas);
 
   // set the canvas size to the size of the container
   let container = document.querySelector("#container .container#map");

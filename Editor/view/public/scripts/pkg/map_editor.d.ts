@@ -25,6 +25,15 @@ export class Map {
 */
   move_view(move_x: number, move_y: number): void;
 /**
+* @param {number} x
+* @param {number} y
+*/
+  set_offset(x: number, y: number): void;
+/**
+* @returns {Offset}
+*/
+  get_offset(): Offset;
+/**
 * @param {number} scale
 */
   set_scale(scale: number): void;
@@ -35,6 +44,13 @@ export class Map {
 /**
 */
   update_canvas(): void;
+/**
+* @param {number} node_type
+* @param {number} x
+* @param {number} y
+* @returns {boolean}
+*/
+  add_node(node_type: number, x: number, y: number): boolean;
 /**
 */
   view: CanvasContext;
@@ -69,9 +85,12 @@ export interface InitOutput {
   readonly __wbg_get_map_view: (a: number) => number;
   readonly __wbg_set_map_view: (a: number, b: number) => void;
   readonly map_move_view: (a: number, b: number, c: number) => void;
+  readonly map_set_offset: (a: number, b: number, c: number) => void;
+  readonly map_get_offset: (a: number) => number;
   readonly map_set_scale: (a: number, b: number) => void;
   readonly map_get_scale: (a: number) => number;
   readonly map_update_canvas: (a: number) => void;
+  readonly map_add_node: (a: number, b: number, c: number, d: number) => number;
   readonly init: () => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

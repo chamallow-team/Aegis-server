@@ -9,9 +9,18 @@ use exported::{ExportedEdge, ExportedMap, ExportedNode};
 #[derive(Debug, Clone, Default, Eq, PartialEq, Ord, PartialOrd, Copy, Serialize, Deserialize)]
 pub struct Coordinates(i64, i64);
 
+
 impl Coordinates {
     pub fn new(x: i64, y: i64) -> Self {
         Self(x, y)
+    }
+    
+    pub fn x(&self) -> i64 {
+        self.0
+    }
+    
+    pub fn y(&self) -> i64 {
+        self.1
     }
 }
 
@@ -33,8 +42,22 @@ impl From<(usize, usize)> for Coordinates {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum NodeType {
+    Water,
     Land(NodeLandType),
-    Water
+}
+
+impl TryFrom<u32> for NodeType {
+    type Error = ();
+    
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Water),
+            i => match NodeLandType::try_from(i) {
+                Ok(t) => Ok(Self::Land(t)),
+                _ => Err(())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
@@ -43,6 +66,20 @@ pub enum NodeLandType {
     Forest = 1,
     Mountain = 2
 }
+
+impl TryFrom<u32> for NodeLandType {
+    type Error = ();
+    
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(Self::Plain),
+            2 => Ok(Self::Forest),
+            3 => Ok(Self::Mountain),
+            _ => Err(())
+        }
+    }
+}
+
 
 impl From<NodeLandType> for NodeType {
     fn from(v: NodeLandType) -> Self {
@@ -64,6 +101,18 @@ impl Node {
             coordinates: coords.into(),
             id
         }
+    }
+
+    pub fn get_id(&self) -> Uuid {
+        self.id
+    }
+    
+    pub fn get_type(&self) -> NodeType {
+        self.node_type
+    }
+    
+    pub fn get_coordinates(&self) -> Coordinates {
+        self.coordinates
     }
 }
 
@@ -134,6 +183,14 @@ impl GameMap {
 
     fn node_index_from_id(&self, id: Uuid) -> Option<NodeIndex> {
         self.graph.node_indices().find(|&index| self.graph[index].id == id)
+    }
+
+    pub fn get_nodes(&self) -> Vec<&Node> {
+        self.graph.node_indices().map(|index| &self.graph[index]).collect()
+    }
+
+    pub fn get_edges(&self) -> Vec<&Edge> {
+        self.graph.edge_indices().map(|index| &self.graph[index]).collect()
     }
 
     pub fn export(&self) -> ExportedMap {
