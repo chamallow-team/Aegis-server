@@ -451,8 +451,6 @@ impl<T: Read> Parser<T> {
 
 // ======================= AsyncParser =======================
 
-// TODO AsyncParser
-
 pub struct AsyncParser<T>
 where
     T: AsyncRead + Unpin,
