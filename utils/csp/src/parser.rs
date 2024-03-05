@@ -148,11 +148,8 @@ impl ParseError {
     }
 
     pub fn set_desc<S: ToString>(&mut self, p: &str, s: S) {
-        match self.description.find(p) {
-            Some(r) => self
-                .description
-                .replace_range(r..r + p.len(), s.to_string().as_str()),
-            None => {}
+        if let Some(r) = self.description.find(p) {
+            self.description.replace_range(r..r + p.len(), s.to_string().as_str())
         }
     }
 }
@@ -367,7 +364,7 @@ impl<T: Read> Parser<T> {
     /// assert_eq!(parser.read_u32(), Ok(1040));
     /// ```
     pub fn read_u32(&mut self) -> ParseResult<u32> {
-        let mut buf = self.read(4)?;
+        let buf = self.read(4)?;
         if buf.len() < 4 {
             let mut error = ParseError::new(ParseErrorId::InvNum, self.pos());
             error.set_desc("{1}", "4");
@@ -375,7 +372,7 @@ impl<T: Read> Parser<T> {
             return Err(error);
         }
         let mut bytes: [u8; 4] = [0; 4];
-        bytes.clone_from_slice(&mut buf[..4]);
+        bytes.clone_from_slice(&buf[..4]);
 
         Ok(u32::from_le_bytes(bytes))
     }
@@ -390,7 +387,7 @@ impl<T: Read> Parser<T> {
     /// assert_eq!(parser.read_u64(), Ok(4294968336));
     /// ```
     pub fn read_u64(&mut self) -> ParseResult<u64> {
-        let mut buf = self.read(8)?;
+        let buf = self.read(8)?;
         if buf.len() < 8 {
             let mut error = ParseError::new(ParseErrorId::InvNum, self.pos());
             error.set_desc("{1}", "8");
@@ -398,7 +395,7 @@ impl<T: Read> Parser<T> {
             return Err(error);
         }
         let mut bytes: [u8; 8] = [0; 8];
-        bytes.clone_from_slice(&mut buf[..8]);
+        bytes.clone_from_slice(&buf[..8]);
 
         Ok(u64::from_le_bytes(bytes))
     }
@@ -661,7 +658,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     /// } )
     /// ```
     pub async fn read_u32(&mut self) -> ParseResult<u32> {
-        let mut buf = self.read(4).await?;
+        let buf = self.read(4).await?;
         if buf.len() < 4 {
             let mut error = ParseError::new(ParseErrorId::InvNum, self.pos());
             error.set_desc("{1}", "4");
@@ -669,7 +666,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
             return Err(error);
         }
         let mut bytes: [u8; 4] = [0; 4];
-        bytes.clone_from_slice(&mut buf[..4]);
+        bytes.clone_from_slice(&buf[..4]);
 
         Ok(u32::from_le_bytes(bytes))
     }
@@ -686,7 +683,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     /// } )
     /// ```
     pub async fn read_u64(&mut self) -> ParseResult<u64> {
-        let mut buf = self.read(8).await?;
+        let buf = self.read(8).await?;
         if buf.len() < 8 {
             let mut error = ParseError::new(ParseErrorId::InvNum, self.pos());
             error.set_desc("{1}", "8");
@@ -694,7 +691,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
             return Err(error);
         }
         let mut bytes: [u8; 8] = [0; 8];
-        bytes.clone_from_slice(&mut buf[..8]);
+        bytes.clone_from_slice(&buf[..8]);
 
         Ok(u64::from_le_bytes(bytes))
     }

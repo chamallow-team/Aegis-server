@@ -67,7 +67,7 @@ impl CspPacket for Packet {
         self.headers[at as usize] = Some(header);
     }
 
-    fn set_headers(&mut self, headers: &Vec<Self::HEADER>) {
+    fn set_headers(&mut self, headers: &[Self::HEADER]) {
         for header in headers.iter() {
             self.set_header(header.clone())
         }
@@ -108,10 +108,8 @@ impl CspPacket for Packet {
             self.set_header(Header::Length(self.data.len() as u64));
         }
 
-        for header in self.headers.iter() {
-            if let Some(header) = header {
-                buf.append(&mut header.to_buffer());
-            }
+        for header in self.headers.iter().flatten() {
+            buf.append(&mut header.to_buffer());
         }
         buf.push(Control::HeaderEnd.into());
 

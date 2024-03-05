@@ -98,7 +98,7 @@ pub trait CspPacket {
     fn get_headers(&self) -> Vec<Self::HEADER>;
 
     fn set_header(&mut self, header: Self::HEADER);
-    fn set_headers(&mut self, headers: &Vec<Self::HEADER>);
+    fn set_headers(&mut self, headers: &[Self::HEADER]);
 
     fn pop_header<T: ToString>(&mut self, header: T) -> Option<Self::HEADER>;
 
