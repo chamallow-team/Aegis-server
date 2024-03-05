@@ -5,9 +5,9 @@ use queue::Queue;
 pub mod v10;
 
 // utilities
+pub mod parser;
 pub mod queue;
 pub mod traits;
-pub mod parser;
 
 // traits
 pub use crate::traits::*;
@@ -22,12 +22,12 @@ pub enum Version {
 
 impl Version {
     /// return the Version from byte representation
-    /// 
+    ///
     /// # Example
     /// ```
     /// use csp::Version;
     /// let v10 = Version::from_u8(32);
-    /// let errored = Version::from_u8(3); 
+    /// let errored = Version::from_u8(3);
     ///
     /// assert_eq!(v10, Some(Version::V10));
     /// assert_eq!(errored, None);
@@ -103,5 +103,5 @@ impl Default for Version {
 
 pub struct PacketqHandler {
     reicv_queue: Queue,
-    send_queue: Queue
+    send_queue: Queue,
 }

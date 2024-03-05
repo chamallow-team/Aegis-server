@@ -168,15 +168,15 @@ impl CspHeader for Header {
     }
 
     /// return the buffer of the header (header + value)
-    /// 
+    ///
     /// # Example
     /// ```
     /// use csp::{traits::CspHeader, v10::spec::Header};
-    /// 
+    ///
     /// let header1 = Header::Id(65545);
     /// let header2 = Header::Compressed(true);
     /// let header3 = Header::Identity("hello".to_string());
-    /// 
+    ///
     /// assert_eq!(header1.to_buffer(), vec![37, 9, 0, 1, 0, 0, 0, 0, 0]);
     /// assert_eq!(header2.to_buffer(), vec![39]);
     /// assert_eq!(header3.to_buffer(), vec![34, 2, 104, 101, 108, 108, 111, 3]);
@@ -215,14 +215,14 @@ impl CspHeader for Header {
     }
 
     /// parser a buffer to a header + it's value
-    /// 
+    ///
     /// # Example
     /// ```
     /// use csp::{traits::CspHeader, v10::spec::Header, parser::Parser};
-    /// 
+    ///
     /// let mut buf: &[u8] = &[37, 9, 0, 1, 0, 0, 0, 0, 0, 39, 34, 2, 104, 101, 108, 108, 111, 3];
     /// let mut parser = Parser::new(&mut buf, Header::get_version());
-    /// 
+    ///
     /// assert_eq!(Header::from_buffer(&mut parser).unwrap(), Header::Id(65545));
     /// assert_eq!(Header::from_buffer(&mut parser).unwrap(), Header::Compressed(true));
     /// assert_eq!(Header::from_buffer(&mut parser).unwrap(), Header::Identity("hello".to_string()));
@@ -251,22 +251,24 @@ impl CspHeader for Header {
     }
 
     /// parser a buffer to a header + it's value from a async parser
-    /// 
+    ///
     /// # Example
     /// ```
     /// use csp::{traits::CspHeader, v10::spec::Header, parser::AsyncParser};
     /// use smol;
-    /// 
+    ///
     /// smol::block_on(async {
     ///     let mut buf: &[u8] = &[37, 9, 0, 1, 0, 0, 0, 0, 0, 39, 34, 2, 104, 101, 108, 108, 111, 3];
     ///     let mut parser = AsyncParser::new(&mut buf, Header::get_version());
-    /// 
+    ///
     ///     assert_eq!(Header::from_buffer_async(&mut parser).await.unwrap(), Header::Id(65545));
     ///     assert_eq!(Header::from_buffer_async(&mut parser).await.unwrap(), Header::Compressed(true));
     ///     assert_eq!(Header::from_buffer_async(&mut parser).await.unwrap(), Header::Identity("hello".to_string()));
     /// })
     /// ```
-    async fn from_buffer_async(parser: &mut AsyncParser<impl AsyncRead + Unpin>) -> ParseResult<Self> {
+    async fn from_buffer_async(
+        parser: &mut AsyncParser<impl AsyncRead + Unpin>,
+    ) -> ParseResult<Self> {
         let byte = parser.read_byte().await?;
         let header: Header = match byte.try_into() {
             Ok(h) => h,
@@ -660,7 +662,6 @@ impl CspControl for Control {
         }
     }
 
-
     /// return the str representation of a control
     ///
     /// # Example
@@ -882,8 +883,14 @@ mod tests {
 
             let mut parser = AsyncParser::new(&mut reader, Version::V10);
 
-            assert_eq!(Header::from_buffer_async(&mut parser).await, Ok(Header::Server(300)));
-            assert_eq!(Header::from_buffer_async(&mut parser).await, Ok(Header::Length(1024)));
+            assert_eq!(
+                Header::from_buffer_async(&mut parser).await,
+                Ok(Header::Server(300))
+            );
+            assert_eq!(
+                Header::from_buffer_async(&mut parser).await,
+                Ok(Header::Length(1024))
+            );
             assert_eq!(
                 Header::from_buffer_async(&mut parser).await,
                 Ok(Header::Identity("a2c4e6".to_string()))
@@ -892,8 +899,14 @@ mod tests {
                 Header::from_buffer_async(&mut parser).await,
                 Ok(Header::Client("1.0.3-bevy-linux".to_string()))
             );
-            assert_eq!(Header::from_buffer_async(&mut parser).await, Ok(Header::Update(true)));
-            assert_eq!(Header::from_buffer_async(&mut parser).await, Ok(Header::Id(255)));
+            assert_eq!(
+                Header::from_buffer_async(&mut parser).await,
+                Ok(Header::Update(true))
+            );
+            assert_eq!(
+                Header::from_buffer_async(&mut parser).await,
+                Ok(Header::Id(255))
+            );
             assert_eq!(
                 Header::from_buffer_async(&mut parser).await,
                 Ok(Header::Reconnect(true))
@@ -903,7 +916,11 @@ mod tests {
                 Ok(Header::Compressed(true))
             );
             assert_eq!(
-                Header::from_buffer_async(&mut parser).await.err().unwrap().id,
+                Header::from_buffer_async(&mut parser)
+                    .await
+                    .err()
+                    .unwrap()
+                    .id,
                 ParseErrorId::UkwnHeader
             );
         })

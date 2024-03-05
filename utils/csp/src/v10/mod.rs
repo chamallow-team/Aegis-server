@@ -1,7 +1,9 @@
 use std::io::Read;
 
 use crate::{
-    parser::{ParseError, ParseErrorId}, traits::{CspControl, CspData, CspDataError, CspHeader, CspMethod, CspPacket}, Version
+    parser::{ParseError, ParseErrorId},
+    traits::{CspControl, CspData, CspDataError, CspHeader, CspMethod, CspPacket},
+    Version,
 };
 use flate2::read::GzDecoder;
 pub use spec::*;
@@ -50,9 +52,7 @@ impl CspPacket for Packet {
 
     fn get_header<T: ToString>(&self, header: T) -> Option<Self::HEADER> {
         let h = Header::from_str(header);
-        if None == h {
-            return None;
-        }
+        h.as_ref()?;
 
         let at = h.unwrap().to_u8() - HEADER_LOWER_VALUE;
         self.headers[at as usize].clone()
@@ -75,9 +75,7 @@ impl CspPacket for Packet {
 
     fn pop_header<T: ToString>(&mut self, header: T) -> Option<Self::HEADER> {
         let h = Header::from_str(header);
-        if None == h {
-            return None;
-        }
+        h.as_ref()?;
 
         let at = h.unwrap().to_u8() - HEADER_LOWER_VALUE;
         let pop = self.headers[at as usize].clone();
@@ -87,7 +85,7 @@ impl CspPacket for Packet {
     }
 
     fn data<Data: for<'a> CspData<'a>>(&mut self) -> Result<Data, CspDataError> {
-        Ok(Data::from_msgpack(self.data.as_slice())?)
+        Data::from_msgpack(self.data.as_slice())
     }
 
     fn set_data<'de>(&mut self, data: &impl CspData<'de>) -> Result<(), CspDataError> {
@@ -98,10 +96,10 @@ impl CspPacket for Packet {
 
     fn prepare(&mut self) -> Result<Vec<u8>, ParseError> {
         let mut buf = Vec::with_capacity(32 + self.len());
-        if self.method == None {
+        if self.method.is_none() {
             let mut error = ParseError::new(ParseErrorId::MissHeader, 2);
             error.set_desc("{1}", "method");
-            return Err(error)
+            return Err(error);
         }
         buf.push(self.version.to_u8());
         buf.push(self.method.unwrap().into());
@@ -125,9 +123,7 @@ impl CspPacket for Packet {
     }
 
     fn is_empty(&self) -> bool {
-        self.data.is_empty()
-            && self.get_headers().is_empty()
-            && self.method == None
+        self.data.is_empty() && self.get_headers().is_empty() && self.method.is_none()
     }
 
     fn clear_headers(&mut self) {
@@ -142,7 +138,8 @@ impl CspPacket for Packet {
     }
 
     fn clear(&mut self) {
-        self.clear_data(); self.clear_headers()
+        self.clear_data();
+        self.clear_headers()
     }
 
     fn parse(
@@ -152,7 +149,6 @@ impl CspPacket for Packet {
         parser.reset();
         self.clear();
 
-
         let byte = parser.read_byte()?;
         let version = Version::from_u8(byte);
         if let Some(version) = version {
@@ -161,7 +157,7 @@ impl CspPacket for Packet {
             let mut error = ParseError::new(ParseErrorId::UkwnHeaderVal, 2);
             error.set_desc("{1}", "version");
             error.set_desc("{2}", byte);
-            return Err(error)
+            return Err(error);
         }
 
         let byte = parser.read_byte()?;
@@ -172,16 +168,14 @@ impl CspPacket for Packet {
             let mut error = ParseError::new(ParseErrorId::UkwnHeaderVal, 2);
             error.set_desc("{1}", "method");
             error.set_desc("{2}", byte);
-            return Err(error)
+            return Err(error);
         }
-
-
 
         loop {
             let byte = parser.peek();
-            if byte == None {
+            if byte.is_none() {
                 let error = ParseError::new(ParseErrorId::ConnectionClosed, 2);
-                return Err(error)
+                return Err(error);
             }
             let byte = byte.unwrap();
 
@@ -208,35 +202,33 @@ impl CspPacket for Packet {
             let data = parser.read(length)?;
             if data.len() != length {
                 let error = ParseError::new(ParseErrorId::InvDataLen, parser.pos());
-                return Err(error)
+                return Err(error);
             }
 
             if let Some(Header::Compressed(true)) = self.get_header("compressed") {
                 let mut buf = Vec::new();
-        
+
                 let mut decoder = GzDecoder::new(data.as_slice());
                 if let Err(err) = decoder.read_to_end(&mut buf) {
                     let mut error = ParseError::new(ParseErrorId::InvDataComp, parser.pos());
                     error.set_desc("{1}", err.to_string());
-                    return Err(error)
+                    return Err(error);
                 }
             } else {
                 self.data = data
             }
         }
 
-
         Ok(parser.pos())
     }
 
     fn parse_async(
         &mut self,
-        parser: &mut crate::parser::AsyncParser<impl smol::io::AsyncRead + Unpin>,
+        _parser: &mut crate::parser::AsyncParser<impl smol::io::AsyncRead + Unpin>,
     ) -> crate::parser::ParseResult<usize> {
         todo!()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -257,14 +249,20 @@ mod tests {
 
         assert_eq!(packet.get_header("length"), Some(Header::Length(31)));
         assert_eq!(packet.get_header("server"), Some(Header::Server(1001)));
-        assert_eq!(packet.get_header("identity"), Some(Header::Identity("abcde".to_string())));
-        assert_eq!(packet.get_header("compressed"), Some(Header::Compressed(true)));
+        assert_eq!(
+            packet.get_header("identity"),
+            Some(Header::Identity("abcde".to_string()))
+        );
+        assert_eq!(
+            packet.get_header("compressed"),
+            Some(Header::Compressed(true))
+        );
         assert_eq!(packet.method(), Some(Method::Connect));
 
         packet.set_headers(&vec![
             Header::Id(1),
             Header::Server(110),
-            Header::Compressed(false)
+            Header::Compressed(false),
         ]);
 
         packet.pop_header("length");
@@ -275,19 +273,18 @@ mod tests {
                 Header::Identity(e) => assert_eq!(e, "abcde".to_string()),
                 Header::Id(e) => assert_eq!(e, 1),
                 Header::Compressed(e) => assert_eq!(e, false),
-                _ => panic!("Wrong packet header {:?}", packet)
+                _ => panic!("Wrong packet header {:?}", packet),
             }
         }
     }
 
     #[test]
     fn packet_data() {
-
         #[derive(serde::Deserialize, serde::Serialize, Debug, Default, PartialEq, Eq)]
         struct User {
             username: String,
             age: u8,
-            hobbies: Vec<String>
+            hobbies: Vec<String>,
         }
         impl CspData<'_> for User {}
 
@@ -296,7 +293,7 @@ mod tests {
         let user = User {
             username: "little endian".to_string(),
             age: 20,
-            hobbies: vec!["biologie".to_string(), "dev".to_string()]
+            hobbies: vec!["biologie".to_string(), "dev".to_string()],
         };
 
         packet.set_data(&user).unwrap();
@@ -311,7 +308,7 @@ mod tests {
         #[derive(serde::Deserialize, serde::Serialize, Debug, Default, PartialEq, Eq)]
         struct User {
             username: String,
-            hash: String
+            hash: String,
         }
         impl CspData<'_> for User {}
 
@@ -326,17 +323,15 @@ mod tests {
 
         let user = User {
             username: "little endian".to_string(),
-            hash: "ae45f4c89aa436d78e4592c214effa4d".to_string()
+            hash: "ae45f4c89aa436d78e4592c214effa4d".to_string(),
         };
         packet.set_data(&user).unwrap();
 
         let buf = packet.prepare().unwrap();
-        let mut valid_buf: Vec<u8> = vec![
-            Version::V10.into(), Method::Connect.into(),
-        ];
+        let mut valid_buf: Vec<u8> = vec![Version::V10.into(), Method::Connect.into()];
 
         let data_buf = b"\x92\xadlittle endian\xd9 ae45f4c89aa436d78e4592c214effa4d";
-        
+
         valid_buf.append(&mut Header::Server(45).to_buffer());
         valid_buf.append(&mut Header::Length(data_buf.len() as u64).to_buffer());
         valid_buf.append(&mut Header::Identity("abcde".to_string()).to_buffer());

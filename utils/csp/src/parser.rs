@@ -1,9 +1,11 @@
-use std::{fmt, io::{self, BufRead, BufReader, Read}};
+use std::{
+    fmt,
+    io::{self, BufRead, BufReader, Read},
+};
 
 use smol::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, BufReader as AsyncBufReader};
 
 use crate::{v10, Version};
-
 
 // ======================= ParseErrorId =======================
 
@@ -165,7 +167,6 @@ impl fmt::Display for ParseError {
     }
 }
 
-
 pub type ParseResult<R> = std::result::Result<R, ParseError>;
 
 // ======================= Parser =======================
@@ -180,7 +181,6 @@ where
 }
 
 impl<T: Read> Parser<T> {
-
     /// create a new parser
     ///
     /// # Arguments
@@ -199,7 +199,8 @@ impl<T: Read> Parser<T> {
     /// ```
     pub fn new(reader: T, version: Version) -> Parser<T> {
         Parser {
-            version, cursor: 0,
+            version,
+            cursor: 0,
             buf: BufReader::new(reader),
         }
     }
@@ -244,10 +245,7 @@ impl<T: Read> Parser<T> {
                     return Err(ParseError::new(ParseErrorId::TimedOut, self.pos()));
                 }
                 Err(e) if e.kind() == io::ErrorKind::ConnectionReset => {
-                    return Err(ParseError::new(
-                        ParseErrorId::ConnectionClosed,
-                        self.pos(),
-                    ))
+                    return Err(ParseError::new(ParseErrorId::ConnectionClosed, self.pos()))
                 }
                 Err(e) => {
                     // TODO: use a proper logger
@@ -263,9 +261,9 @@ impl<T: Read> Parser<T> {
     }
 
     /// peek the buffer for more data
-    /// 
+    ///
     /// usefull when attempting to wait for a packet without consumming the buffer
-    /// 
+    ///
     /// # Example
     /// ```
     /// let reader: &[u8] = &[1,2,3];
@@ -297,10 +295,7 @@ impl<T: Read> Parser<T> {
     pub fn read_byte(&mut self) -> ParseResult<u8> {
         let buf = self.read(1)?;
         if buf.is_empty() {
-            return Err(ParseError::new(
-                ParseErrorId::ConnectionClosed,
-                self.pos(),
-            ));
+            return Err(ParseError::new(ParseErrorId::ConnectionClosed, self.pos()));
         }
 
         Ok(buf[0])
@@ -466,12 +461,12 @@ where
     T: AsyncRead + Unpin,
 {
     version: Version,
-    cursor:usize,
+    cursor: usize,
     buf: AsyncBufReader<T>,
 }
 
 impl<T: AsyncRead + Unpin> AsyncParser<T> {
-/// create a new async parser
+    /// create a new async parser
     ///
     /// # Arguments
     /// * `reader` - a type that implement AsyncRead
@@ -491,7 +486,8 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     /// ```
     pub fn new(reader: T, version: Version) -> AsyncParser<T> {
         AsyncParser {
-            cursor: 0, version,
+            cursor: 0,
+            version,
             buf: AsyncBufReader::new(reader),
         }
     }
@@ -534,10 +530,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
                     // FIXME: does async read thow ErrorKind::Interrupted ?
                 }
                 Err(e) if e.kind() == io::ErrorKind::ConnectionReset => {
-                    return Err(ParseError::new(
-                        ParseErrorId::ConnectionClosed,
-                        self.pos(),
-                    ))
+                    return Err(ParseError::new(ParseErrorId::ConnectionClosed, self.pos()))
                 }
                 Err(e) => {
                     // TODO: use a proper logger
@@ -554,9 +547,9 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     }
 
     /// peek the buffer for more data
-    /// 
+    ///
     /// usefull when attempting to wait for a packet without consumming the buffer
-    /// 
+    ///
     /// # Example
     /// ```
     /// smol::block_on( async {
@@ -592,10 +585,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     pub async fn read_byte(&mut self) -> ParseResult<u8> {
         let buf = self.read(1).await?;
         if buf.is_empty() {
-            return Err(ParseError::new(
-                ParseErrorId::ConnectionClosed,
-                self.pos(),
-            ));
+            return Err(ParseError::new(ParseErrorId::ConnectionClosed, self.pos()));
         }
 
         Ok(buf[0])
@@ -709,7 +699,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
         Ok(u64::from_le_bytes(bytes))
     }
 
-        /// tells the position of the parser's cursor
+    /// tells the position of the parser's cursor
     ///
     /// # Example
     /// ```

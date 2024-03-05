@@ -1,11 +1,17 @@
-use std::{fmt::Debug, io::{Read, Write}};
+use std::{
+    fmt::Debug,
+    io::{Read, Write},
+};
 
 use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use rmp_serde::{decode, encode, Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use smol::io::AsyncRead;
 
-use crate::{parser::{AsyncParser, ParseError, ParseResult, Parser}, Version};
+use crate::{
+    parser::{AsyncParser, ParseError, ParseResult, Parser},
+    Version,
+};
 
 // ======================= Header =======================
 
@@ -32,9 +38,11 @@ pub trait CspHeader: Debug + Clone + PartialEq + Eq {
     fn to_buffer(&self) -> Vec<u8>;
 
     fn from_buffer(parser: &mut Parser<impl Read>) -> ParseResult<Self>;
-    
+
     #[allow(async_fn_in_trait)]
-    async fn from_buffer_async(parser: &mut AsyncParser<impl AsyncRead + Unpin>) -> ParseResult<Self>;
+    async fn from_buffer_async(
+        parser: &mut AsyncParser<impl AsyncRead + Unpin>,
+    ) -> ParseResult<Self>;
 }
 
 // ======================= Method =======================
@@ -78,14 +86,13 @@ pub trait CspPacket {
     type METHOD;
 
     fn new() -> Self;
-    
+
     fn len(&self) -> usize;
-    
+
     fn version(&self) -> Version;
 
     fn method(&self) -> Option<Self::METHOD>;
     fn set_method(&mut self, method: Self::METHOD);
-
 
     fn get_header<T: ToString>(&self, header: T) -> Option<Self::HEADER>;
     fn get_headers(&self) -> Vec<Self::HEADER>;
@@ -96,7 +103,7 @@ pub trait CspPacket {
     fn pop_header<T: ToString>(&mut self, header: T) -> Option<Self::HEADER>;
 
     // FIXME offer an interface to dump data as raw bytes
-    fn data<Data: for <'a> CspData<'a>>(&mut self) -> Result<Data, CspDataError>;
+    fn data<Data: for<'a> CspData<'a>>(&mut self) -> Result<Data, CspDataError>;
     fn set_data<'de>(&mut self, data: &impl CspData<'de>) -> Result<(), CspDataError>;
 
     fn prepare(&mut self) -> Result<Vec<u8>, ParseError>;
@@ -105,9 +112,12 @@ pub trait CspPacket {
     fn clear_headers(&mut self);
     fn clear_data(&mut self);
     fn clear(&mut self);
-    
+
     fn parse(&mut self, parser: &mut Parser<impl Read>) -> ParseResult<usize>;
-    fn parse_async(&mut self, parser: &mut AsyncParser<impl AsyncRead + Unpin>) -> ParseResult<usize>;
+    fn parse_async(
+        &mut self,
+        parser: &mut AsyncParser<impl AsyncRead + Unpin>,
+    ) -> ParseResult<usize>;
 }
 
 // ======================= CspData =======================
@@ -119,7 +129,7 @@ pub enum CspDataError {
     /// Serialization error, where rmp_serde fails to encode the buffer
     Serialization(encode::Error),
     /// Deserialization error, where rmp_serde fails to decode the buffer  
-    Deserialization(decode::Error)
+    Deserialization(decode::Error),
 }
 
 pub trait CspData<'de>: Serialize + Deserialize<'de> {
@@ -150,9 +160,9 @@ pub trait CspData<'de>: Serialize + Deserialize<'de> {
     fn to_msgpack_compressed(&self) -> Result<Vec<u8>, CspDataError> {
         let buf = self.to_msgpack()?;
         let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
-        
+
         if let Err(err) = encoder.write_all(buf.as_slice()) {
-            return Err(CspDataError::Compression(err))
+            return Err(CspDataError::Compression(err));
         }
 
         let res = encoder.finish();
@@ -173,7 +183,7 @@ pub trait CspData<'de>: Serialize + Deserialize<'de> {
     fn from_msgpack<T: Read>(reader: T) -> Result<Self, CspDataError> {
         let res = Self::deserialize(&mut Deserializer::new(reader));
         if let Err(err) = res {
-            return Err(CspDataError::Deserialization(err))
+            return Err(CspDataError::Deserialization(err));
         }
         Ok(res.unwrap())
     }
@@ -186,12 +196,12 @@ pub trait CspData<'de>: Serialize + Deserialize<'de> {
     /// ```
     fn from_msgpack_compressed<T: Read>(reader: T) -> Result<Self, CspDataError> {
         let mut buf = Vec::new();
-        
+
         let mut decoder = GzDecoder::new(reader);
         if let Err(err) = decoder.read_to_end(&mut buf) {
-            return Err(CspDataError::Compression(err))
+            return Err(CspDataError::Compression(err));
         }
 
-        Ok(Self::from_msgpack(buf.as_slice())?)
+        Self::from_msgpack(buf.as_slice())
     }
 }
