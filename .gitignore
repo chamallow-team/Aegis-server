@@ -3,4 +3,4 @@ Cargo.lock
 .idea
 .vscode
 doc/.idea
-*.rs.old
+*.old
