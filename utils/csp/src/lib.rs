@@ -1,10 +1,16 @@
+use queue::Queue;
 
-
+// === exports ===
+// csp versions
 pub mod v10;
 
+// utilities
 pub mod queue;
 pub mod traits;
 pub mod parser;
+
+// traits
+pub use crate::traits::*;
 
 // ======================= Version =======================
 
@@ -15,18 +21,48 @@ pub enum Version {
 }
 
 impl Version {
+    /// return the Version from byte representation
+    /// 
+    /// # Example
+    /// ```
+    /// use csp::Version;
+    /// let v10 = Version::from_u8(32);
+    /// let errored = Version::from_u8(3); 
+    ///
+    /// assert_eq!(v10, Some(Version::V10));
+    /// assert_eq!(errored, None);
+    /// ```
     pub fn from_u8(byte: u8) -> Option<Version> {
         match byte {
             32 => Some(Version::V10),
             _ => None,
         }
     }
+
+    /// returns the byte representation of a version
+    ///
+    /// # Example
+    /// ```
+    /// use csp::Version;
+    /// let byte = Version::V10.to_u8();
+    ///
+    /// assert_eq!(byte, 32);
+    /// ```
     pub fn to_u8(&self) -> u8 {
         match self {
             Version::V10 => 32,
         }
     }
 
+    /// returns human readable str of a version
+    ///
+    /// # Example
+    /// ```
+    /// use csp::Version;
+    /// let s = Version::V10.to_str();
+    ///
+    /// assert_eq!(s, "1.0");
+    /// ```
     pub fn to_str(&self) -> &'static str {
         match self {
             Version::V10 => "1.0",
@@ -65,6 +101,7 @@ impl Default for Version {
 
 // ======================= PacketHandler =======================
 
-pub struct PacketHandler {
- // TODO PacketHandler
+pub struct PacketqHandler {
+    reicv_queue: Queue,
+    send_queue: Queue
 }

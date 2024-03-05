@@ -4,7 +4,7 @@ use crate::{
     parser::{ParseError, ParseErrorId}, traits::{CspControl, CspData, CspDataError, CspHeader, CspMethod, CspPacket}, Version
 };
 use flate2::read::GzDecoder;
-use spec::*;
+pub use spec::*;
 
 pub mod spec;
 

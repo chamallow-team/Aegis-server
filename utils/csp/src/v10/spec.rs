@@ -1,8 +1,8 @@
+// see /doc/csp/v1.0.md
 use std::io::Read;
 
 use smol::io::AsyncRead;
 
-// see /doc/csp/v1.0.md
 use crate::{
     parser::{AsyncParser, ParseError, ParseErrorId, ParseResult, Parser},
     traits::{CspControl, CspHeader, CspMethod},
@@ -49,14 +49,40 @@ pub enum Header {
 }
 
 impl CspHeader for Header {
+    /// return the version of the spec
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{Version, traits::CspHeader, v10::spec::Header};
+    ///
+    /// assert_eq!(Header::get_version(), Version::V10);
+    /// ```
     fn get_version() -> crate::Version {
         crate::Version::V10
     }
 
+    /// return the version of the spec
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{Version, traits::CspHeader, v10::spec::Header};
+    ///
+    /// assert_eq!(Header::Reconnect(true).version(), Version::V10);
+    /// ```
     fn version(&self) -> crate::Version {
         crate::Version::V10
     }
 
+    /// parse a string to a valid header, with default values
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header};
+    ///
+    /// assert!(Header::Server(0).matches(&Header::from_str("ServEr").unwrap()));
+    /// assert!(Header::Reconnect(true).matches(&Header::from_str("reconnect").unwrap()));
+    /// assert!(Header::Identity("".to_string()).matches(&Header::from_str("IDENTITY").unwrap()));
+    /// ```
     fn from_str<T: ToString>(s: T) -> Option<Self> {
         match s.to_string().to_lowercase().as_str() {
             "server" => Some(Header::Server(0)),
@@ -71,6 +97,16 @@ impl CspHeader for Header {
         }
     }
 
+    /// return the str representation of an header
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header};
+    ///
+    /// assert_eq!(Header::Server(0).to_str(), "server");
+    /// assert_eq!(Header::Reconnect(true).to_str(), "reconnect");
+    /// assert_eq!(Header::Identity("".to_string()).to_str(), "identity");
+    /// ```
     fn to_str(&self) -> &'static str {
         match self {
             Header::Server(_) => "server",
@@ -84,6 +120,16 @@ impl CspHeader for Header {
         }
     }
 
+    /// parse a byte to it's header representation with default value
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header};
+    ///
+    /// assert_eq!(Header::from_u8(32), Some(Header::Server(0)));
+    /// assert_eq!(Header::from_u8(38), Some(Header::Reconnect(false)));
+    /// assert_eq!(Header::from_u8(99), None);
+    /// ```
     fn from_u8(byte: u8) -> Option<Self> {
         match byte {
             32 => Some(Header::Server(0)),
@@ -98,6 +144,16 @@ impl CspHeader for Header {
         }
     }
 
+    /// return the byte representation of an header
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header};
+    ///
+    /// assert_eq!(Header::Server(0).to_u8(), 32);
+    /// assert_eq!(Header::Reconnect(true).to_u8(), 38);
+    /// assert_eq!(Header::Identity("".to_string()).to_u8(), 34);
+    /// ```
     fn to_u8(&self) -> u8 {
         match self {
             Header::Server(_) => 32,
@@ -111,6 +167,20 @@ impl CspHeader for Header {
         }
     }
 
+    /// return the buffer of the header (header + value)
+    /// 
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header};
+    /// 
+    /// let header1 = Header::Id(65545);
+    /// let header2 = Header::Compressed(true);
+    /// let header3 = Header::Identity("hello".to_string());
+    /// 
+    /// assert_eq!(header1.to_buffer(), vec![37, 9, 0, 1, 0, 0, 0, 0, 0]);
+    /// assert_eq!(header2.to_buffer(), vec![39]);
+    /// assert_eq!(header3.to_buffer(), vec![34, 2, 104, 101, 108, 108, 111, 3]);
+    /// ```
     fn to_buffer(&self) -> Vec<u8> {
         match self {
             // string
@@ -144,6 +214,19 @@ impl CspHeader for Header {
         }
     }
 
+    /// parser a buffer to a header + it's value
+    /// 
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header, parser::Parser};
+    /// 
+    /// let mut buf: &[u8] = &[37, 9, 0, 1, 0, 0, 0, 0, 0, 39, 34, 2, 104, 101, 108, 108, 111, 3];
+    /// let mut parser = Parser::new(&mut buf, Header::get_version());
+    /// 
+    /// assert_eq!(Header::from_buffer(&mut parser).unwrap(), Header::Id(65545));
+    /// assert_eq!(Header::from_buffer(&mut parser).unwrap(), Header::Compressed(true));
+    /// assert_eq!(Header::from_buffer(&mut parser).unwrap(), Header::Identity("hello".to_string()));
+    /// ```
     fn from_buffer(parser: &mut Parser<impl Read>) -> ParseResult<Self> {
         let byte = parser.read_byte()?;
         let header: Header = match byte.try_into() {
@@ -167,6 +250,22 @@ impl CspHeader for Header {
         }
     }
 
+    /// parser a buffer to a header + it's value from a async parser
+    /// 
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspHeader, v10::spec::Header, parser::AsyncParser};
+    /// use smol;
+    /// 
+    /// smol::block_on(async {
+    ///     let mut buf: &[u8] = &[37, 9, 0, 1, 0, 0, 0, 0, 0, 39, 34, 2, 104, 101, 108, 108, 111, 3];
+    ///     let mut parser = AsyncParser::new(&mut buf, Header::get_version());
+    /// 
+    ///     assert_eq!(Header::from_buffer_async(&mut parser).await.unwrap(), Header::Id(65545));
+    ///     assert_eq!(Header::from_buffer_async(&mut parser).await.unwrap(), Header::Compressed(true));
+    ///     assert_eq!(Header::from_buffer_async(&mut parser).await.unwrap(), Header::Identity("hello".to_string()));
+    /// })
+    /// ```
     async fn from_buffer_async(parser: &mut AsyncParser<impl AsyncRead + Unpin>) -> ParseResult<Self> {
         let byte = parser.read_byte().await?;
         let header: Header = match byte.try_into() {
@@ -321,14 +420,40 @@ pub enum Method {
 }
 
 impl CspMethod for Method {
+    /// return the version of the spec
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{Version, traits::CspMethod, v10::spec::Method};
+    ///
+    /// assert_eq!(Method::get_version(), Version::V10);
+    /// ```
     fn get_version() -> crate::Version {
         crate::Version::V10
     }
 
+    /// return the version of the spec
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{Version, traits::CspMethod, v10::spec::Method};
+    ///
+    /// assert_eq!(Method::Connect.version(), Version::V10);
+    /// ```
     fn version(&self) -> crate::Version {
         crate::Version::V10
     }
 
+    /// parse a byte to it's method representation with default value
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspMethod, v10::spec::Method};
+    ///
+    /// assert_eq!(Method::from_u8(32), Some(Method::Connect));
+    /// assert_eq!(Method::from_u8(38), Some(Method::Error));
+    /// assert_eq!(Method::from_u8(99), None);
+    /// ```
     fn from_u8(byte: u8) -> Option<Method> {
         match byte {
             32 => Some(Method::Connect),
@@ -342,6 +467,17 @@ impl CspMethod for Method {
             _ => None,
         }
     }
+
+    /// return the byte representation of an method
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspMethod, v10::spec::Method};
+    ///
+    /// assert_eq!(Method::Connect.to_u8(), 32);
+    /// assert_eq!(Method::Error.to_u8(), 38);
+    /// assert_eq!(Method::Disconnect.to_u8(), 34);
+    /// ```
     fn to_u8(&self) -> u8 {
         match self {
             Method::Connect => 32,
@@ -355,6 +491,16 @@ impl CspMethod for Method {
         }
     }
 
+    /// return the str representation of a Method
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspMethod, v10::spec::Method};
+    ///
+    /// assert_eq!(Method::Connect.to_str(), "connect");
+    /// assert_eq!(Method::Error.to_str(), "error");
+    /// assert_eq!(Method::Update.to_str(), "update");
+    /// ```
     fn to_str(&self) -> &'static str {
         match self {
             Method::Connect => "connect",
@@ -368,6 +514,16 @@ impl CspMethod for Method {
         }
     }
 
+    /// parse a string to a valid method
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspMethod, v10::spec::Method};
+    ///
+    /// assert_eq!(Method::from_str("Connect"), Some(Method::Connect));
+    /// assert_eq!(Method::from_str("ERROR"), Some(Method::Error));
+    /// assert_eq!(Method::from_str("bklblb"), None);
+    /// ```
     fn from_str<T: ToString>(s: T) -> Option<Self> {
         match s.to_string().to_lowercase().as_str() {
             "connect" => Some(Method::Connect),
@@ -444,14 +600,40 @@ pub enum Control {
 }
 
 impl CspControl for Control {
+    /// return the version of the spec
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{Version, traits::CspControl, v10::spec::Control};
+    ///
+    /// assert_eq!(Control::get_version(), Version::V10);
+    /// ```
     fn get_version() -> crate::Version {
         crate::Version::V10
     }
 
+    /// return the version of the spec
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{Version, traits::CspControl, v10::spec::Control};
+    ///
+    /// assert_eq!(Control::HeaderEnd.version(), Version::V10);
+    /// ```
     fn version(&self) -> crate::Version {
         crate::Version::V10
     }
 
+    /// parse a byte to it's Control representation
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspControl, v10::spec::Control};
+    ///
+    /// assert_eq!(Control::from_u8(1), Some(Control::HeaderEnd));
+    /// assert_eq!(Control::from_u8(3), Some(Control::StringEnd));
+    /// assert_eq!(Control::from_u8(30), None);
+    /// ```
     fn from_u8(byte: u8) -> Option<Self> {
         match byte {
             1 => Some(Self::HeaderEnd),
@@ -461,6 +643,15 @@ impl CspControl for Control {
         }
     }
 
+    /// return the byte representation of a control
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspControl, v10::spec::Control};
+    ///
+    /// assert_eq!(Control::StringEnd.to_u8(), 3);
+    /// assert_eq!(Control::HeaderEnd.to_u8(), 1);
+    /// ```
     fn to_u8(&self) -> u8 {
         match self {
             Self::HeaderEnd => 1,
@@ -469,6 +660,16 @@ impl CspControl for Control {
         }
     }
 
+
+    /// return the str representation of a control
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspControl, v10::spec::Control};
+    ///
+    /// assert_eq!(Control::HeaderEnd.to_str(), "header_end");
+    /// assert_eq!(Control::StringStart.to_str(), "string_start");
+    /// ```
     fn to_str(&self) -> &'static str {
         match self {
             Control::HeaderEnd => "header_end",
@@ -477,6 +678,16 @@ impl CspControl for Control {
         }
     }
 
+    /// parse a string to a valid Control
+    ///
+    /// # Example
+    /// ```
+    /// use csp::{traits::CspControl, v10::spec::Control};
+    ///
+    /// assert_eq!(Control::from_str("header_END"), Some(Control::HeaderEnd));
+    /// assert_eq!(Control::from_str("string_start"), Some(Control::StringStart));
+    /// assert_eq!(Control::from_str(":)"), None);
+    /// ```
     fn from_str<T: ToString>(s: T) -> Option<Self> {
         match s.to_string().to_lowercase().as_str() {
             "header_end" => Some(Self::HeaderEnd),

@@ -23,7 +23,7 @@ pub trait CspHeader: Debug + Clone + PartialEq + Eq {
     /// get a string representation of an header, regardless of it's content
     fn to_str(&self) -> &'static str;
 
-    /// parse an byte to it's header representation with default content
+    /// parse a byte to it's header representation with default content
     fn from_u8(byte: u8) -> Option<Self>;
     /// get the byte representation of an header
     fn to_u8(&self) -> u8;
@@ -114,13 +114,22 @@ pub trait CspPacket {
 
 #[derive(Debug)]
 pub enum CspDataError {
+    /// Compression error, when gzip fail to compress/decompress the buffer
     Compression(std::io::Error),
+    /// Serialization error, where rmp_serde fails to encode the buffer
     Serialization(encode::Error),
+    /// Deserialization error, where rmp_serde fails to decode the buffer  
     Deserialization(decode::Error)
 }
 
 pub trait CspData<'de>: Serialize + Deserialize<'de> {
-
+    /// Serialize the data to msgpack, returning a vector of bytes
+    ///
+    /// # Example
+    /// ```rs
+    /// let data = Data::default();
+    /// let buf = data.to_msgpack().unwrap();
+    /// ```
     fn to_msgpack(&self) -> Result<Vec<u8>, CspDataError> {
         let mut buf = Vec::new();
 
@@ -131,6 +140,13 @@ pub trait CspData<'de>: Serialize + Deserialize<'de> {
         }
     }
 
+    /// Serialize the data to compressed msgpack, returning a vector of bytes
+    ///
+    /// # Example
+    /// ```rs
+    /// let data = Data::default();
+    /// let buf = data.to_msgpack_compressed().unwrap();
+    /// ```
     fn to_msgpack_compressed(&self) -> Result<Vec<u8>, CspDataError> {
         let buf = self.to_msgpack()?;
         let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
@@ -148,7 +164,12 @@ pub trait CspData<'de>: Serialize + Deserialize<'de> {
         }
     }
 
-
+    /// Deserialize a buffer to a Data struct
+    ///
+    /// # Example
+    /// ```rs
+    /// let data = Data::from_msgpack(buffer).unwrap();
+    /// ```
     fn from_msgpack<T: Read>(reader: T) -> Result<Self, CspDataError> {
         let res = Self::deserialize(&mut Deserializer::new(reader));
         if let Err(err) = res {
@@ -157,6 +178,12 @@ pub trait CspData<'de>: Serialize + Deserialize<'de> {
         Ok(res.unwrap())
     }
 
+    /// Deserialize a compressed buffer to a Data struct
+    ///
+    /// # Example
+    /// ```rs
+    /// let data = Data::from_msgpack_compressed(buffer).unwrap();
+    /// ```
     fn from_msgpack_compressed<T: Read>(reader: T) -> Result<Self, CspDataError> {
         let mut buf = Vec::new();
         
