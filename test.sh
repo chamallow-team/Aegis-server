@@ -13,7 +13,7 @@ specific() {
 wasm() {
   echo -e "\x1b[32mTesting all the packages with is targeted for wasm\x1b[0m"
   cd "$(dirname "$0")" || exit
-  cd Editor/map-editor || exit
+  cd Editor/map_view-editor || exit
 
   IS_HEADLESS=""
   if [ "$2" = "--headless" ] || [ "$2" == "-hl" ]; then

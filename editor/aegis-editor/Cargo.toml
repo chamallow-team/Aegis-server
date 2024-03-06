@@ -1,0 +1,11 @@
+[package]
+name = "aegis-editor"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { workspace = true, features = ["default"] }
+editor = { path = ".." }
+bevy_embedded_assets = "0.10.0"

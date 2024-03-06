@@ -1,0 +1,1 @@
+pub(crate) const TITLE: &str = "Aegis Editor";

@@ -7,36 +7,39 @@ use uuid::Uuid;
 use exported::{ExportedEdge, ExportedMap, ExportedNode};
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, Ord, PartialOrd, Copy, Serialize, Deserialize)]
-pub struct Coordinates(i64, i64);
+pub struct Coordinates {
+    pub x: i64,
+    pub y: i64
+}
 
 
 impl Coordinates {
     pub fn new(x: i64, y: i64) -> Self {
-        Self(x, y)
+        Self { x, y }
     }
     
     pub fn x(&self) -> i64 {
-        self.0
+        self.x
     }
     
     pub fn y(&self) -> i64 {
-        self.1
+        self.y
     }
 }
 
 impl From<(i64, i64)> for Coordinates {
     fn from(v: (i64, i64)) -> Self {
-        Self(v.0, v.1)
+        Self::new(v.0, v.1)
     }
 }
 impl From<(i32, i32)> for Coordinates {
     fn from(v: (i32, i32)) -> Self {
-        Self(v.0 as i64, v.1 as i64)
+        Self::new(v.0 as i64, v.1 as i64)
     }
 }
 impl From<(usize, usize)> for Coordinates {
     fn from(v: (usize, usize)) -> Self {
-        Self(v.0 as i64, v.1 as i64)
+        Self::new(v.0 as i64, v.1 as i64)
     }
 }
 
@@ -113,6 +116,11 @@ impl Node {
     
     pub fn get_coordinates(&self) -> Coordinates {
         self.coordinates
+    }
+
+
+    pub fn get_coordinates_mut(&mut self) -> &mut Coordinates {
+        &mut self.coordinates
     }
 }
 

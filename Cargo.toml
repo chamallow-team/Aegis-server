@@ -4,7 +4,6 @@ members = [
     "modules/database",
     "modules/diplomacy",
     "modules/map",
-    "Editor/map-editor",
     "modules/market",
     "modules/resources",
     "modules/technology_tree",
@@ -13,7 +12,10 @@ members = [
     "utils/auth",
     "utils/logs",
     "utils/save",
-    "server"
+    "server",
+    "modules/map_renderer",
+    "editor",
+    "editor/aegis-editor"
 ]
 resolver = "1"
 
@@ -45,7 +47,4 @@ log = "0.4.20"
 chrono = "0.4.34"
 
 petgraph = "0.6.4"
-
-[profile.release]
-# Tell `rustc` to optimize for small code size.
-opt-level = "s"
+bevy = "0.13.0"
