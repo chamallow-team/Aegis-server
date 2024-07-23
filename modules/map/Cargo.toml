@@ -6,3 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bevy = { workspace = true }
+bevy_mod_outline = { workspace = true }
+serde = { workspace = true }
+petgraph = { workspace = true, features = ["default", "serde", "serde_derive"] }
+uuid = { workspace = true, features = ["serde"] }
+serde_json = { workspace = true }
