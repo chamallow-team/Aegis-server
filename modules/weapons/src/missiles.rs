@@ -1,13 +1,12 @@
 //! This module define missiles
 
-
-use serde::{Deserialize, Serialize};
 use crate::{Damages, Speed, WeaponInformations};
+use serde::{Deserialize, Serialize};
 
 /// The projectile type is the type of trajectory the missile will be using
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[repr(u8)]
-pub enum ProjectileType {   
+pub enum ProjectileType {
     /// The missile is guided by a human operator
     ///
     /// The missile is able to change his trajectory after launch and is able to follow a target.
@@ -17,7 +16,7 @@ pub enum ProjectileType {
     ///
     /// His trajectory is a parabola, and he can go up to 100 km in altitude.
     /// He can't change his trajectory after launch.
-    Ballistic = 1
+    Ballistic = 1,
 }
 
 impl TryFrom<i64> for ProjectileType {
@@ -27,7 +26,7 @@ impl TryFrom<i64> for ProjectileType {
         match value {
             0 => Ok(ProjectileType::Cruise),
             1 => Ok(ProjectileType::Ballistic),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -45,7 +44,7 @@ pub enum MissileGuidanceType {
     /// The missile is guided by a GPS signal
     Gps = 3,
     /// The missile is guided by a radio signal
-    Radio = 4
+    Radio = 4,
 }
 
 impl TryFrom<i64> for MissileGuidanceType {
@@ -58,7 +57,7 @@ impl TryFrom<i64> for MissileGuidanceType {
             2 => Ok(MissileGuidanceType::Heat),
             3 => Ok(MissileGuidanceType::Gps),
             4 => Ok(MissileGuidanceType::Radio),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -85,7 +84,7 @@ pub enum WarheadType {
     ///
     /// # Note
     /// Should only be used with a nuclear charge, otherwise it's useless and will do nothing
-    Emp = 7
+    Emp = 7,
 }
 
 impl TryFrom<i64> for WarheadType {
@@ -101,7 +100,7 @@ impl TryFrom<i64> for WarheadType {
             5 => Ok(WarheadType::Mrbm),
             6 => Ok(WarheadType::Icbm),
             7 => Ok(WarheadType::Emp),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -118,7 +117,7 @@ pub enum WarheadCharge {
     /// A nuclear charge, no further explanation needed
     Nuclear = 2,
     /// A biological charge, will release a cloud with a deadly virus or bacteria
-    Biological = 3
+    Biological = 3,
 }
 
 impl TryFrom<i64> for WarheadCharge {
@@ -130,7 +129,7 @@ impl TryFrom<i64> for WarheadCharge {
             1 => Ok(WarheadCharge::Chemical),
             2 => Ok(WarheadCharge::Nuclear),
             3 => Ok(WarheadCharge::Biological),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -162,7 +161,7 @@ pub struct Missile {
 
     /// The information about the missile
     informations: WeaponInformations,
-    damages: Damages
+    damages: Damages,
 }
 
 /// Default speed of a missile in meters per second
@@ -185,13 +184,14 @@ impl Missile {
     /// ```
     pub fn new(guidance: MissileGuidanceType, projectile: ProjectileType) -> Self {
         Self {
-            guidance, projectile,
+            guidance,
+            projectile,
             hypersonic: false,
             warhead: WarheadType::Cruise,
             warhead_charge: WarheadCharge::Standard,
             warhead_count: 1,
             informations: WeaponInformations::default(),
-            damages: Damages::default()
+            damages: Damages::default(),
         }
     }
 
@@ -570,7 +570,7 @@ mod test {
             caliber: 0.0,
             speed: 315.0,
             range: 180.0,
-            country_reference: "FR".to_string()
+            country_reference: "FR".to_string(),
         });
         assert_eq!(missile.get_informations().name, "Exocet".to_string());
         assert_eq!(missile.get_informations().caliber, 0.0);
@@ -606,7 +606,7 @@ mod test {
             ship: 8.0,
             submarine: 9.0,
             missile: 10.0,
-            satellite: 11.0
+            satellite: 11.0,
         });
 
         assert_eq!(missile.get_damages().building, 1.0);

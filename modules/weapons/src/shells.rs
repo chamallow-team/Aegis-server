@@ -1,7 +1,7 @@
 //! This module define shells used in tanks and armored vehicles.
 
-use serde::{Deserialize, Serialize};
 use crate::{Damages, WeaponInformations};
+use serde::{Deserialize, Serialize};
 
 /// The type of shell
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, PartialOrd, Copy)]
@@ -66,7 +66,7 @@ impl TryFrom<i64> for ShellType {
             5 => Ok(ShellType::ArmorPiercingFinStabilizedDiscardingSabot),
             6 => Ok(ShellType::TandemCharge),
             7 => Ok(ShellType::Mortar),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -77,7 +77,7 @@ pub struct Shell {
     shell_type: ShellType,
 
     informations: WeaponInformations,
-    damages: Damages
+    damages: Damages,
 }
 
 impl Shell {
@@ -92,7 +92,7 @@ impl Shell {
         Self {
             shell_type,
             informations: WeaponInformations::default(),
-            damages: Damages::default()
+            damages: Damages::default(),
         }
     }
 
@@ -189,7 +189,7 @@ impl Shell {
 #[cfg(test)]
 mod test {
     #[test]
-    fn test_shell_default(){
+    fn test_shell_default() {
         use super::*;
         let shell = Shell::new(ShellType::ArmorPiercing);
         assert_eq!(shell.get_shell_type(), ShellType::ArmorPiercing);
@@ -200,14 +200,14 @@ mod test {
     }
 
     #[test]
-    fn test_get_shell_type(){
+    fn test_get_shell_type() {
         use super::*;
         let shell = Shell::new(ShellType::ArmorPiercing);
         assert_eq!(shell.get_shell_type(), ShellType::ArmorPiercing);
     }
 
     #[test]
-    fn test_shell_set_shell_type(){
+    fn test_shell_set_shell_type() {
         use super::*;
         let mut shell = Shell::new(ShellType::ArmorPiercing);
         shell.set_shell_type(ShellType::HighExplosive);
@@ -215,7 +215,7 @@ mod test {
     }
 
     #[test]
-    fn test_shell_get_informations(){
+    fn test_shell_get_informations() {
         use super::*;
         let shell = Shell::new(ShellType::ArmorPiercing);
         assert_eq!(shell.get_informations().name, "".to_string());
@@ -225,7 +225,7 @@ mod test {
     }
 
     #[test]
-    fn test_set_shell_informations(){
+    fn test_set_shell_informations() {
         use super::*;
 
         let mut shell = Shell::new(ShellType::Fragmentation);
@@ -234,7 +234,7 @@ mod test {
     }
 
     #[test]
-    fn test_shell_get_damages(){
+    fn test_shell_get_damages() {
         use super::*;
         let shell = Shell::new(ShellType::ArmorPiercing);
         assert_eq!(shell.get_damages().building, 0.0);
@@ -252,7 +252,7 @@ mod test {
 
     #[cfg(feature = "load_configuration")]
     #[test]
-    fn load_config(){
+    fn load_config() {
         let mut p = std::env::current_dir().unwrap();
         p.push("../../data/config/weapons");
 

@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
 use crate::bullets::Bullet;
 use crate::firearm::FireArm;
 use crate::missiles::Missile;
 use crate::shells::Shell;
 use crate::torpedo::Torpedo;
+use serde::{Deserialize, Serialize};
 
+pub mod bullets;
+pub mod firearm;
 pub mod missiles;
 pub mod shells;
 pub mod torpedo;
-pub mod bullets;
-pub mod firearm;
 
 /// Speed in meters per second
 ///
@@ -27,7 +27,7 @@ pub struct WeaponStore {
     torpedoes: HashMap<WeaponID, Torpedo>,
     shells: HashMap<WeaponID, Shell>,
     firearm: HashMap<WeaponID, FireArm>,
-    bullets: HashMap<WeaponID, Bullet>
+    bullets: HashMap<WeaponID, Bullet>,
 }
 
 impl WeaponStore {
@@ -252,5 +252,5 @@ pub struct WeaponInformations {
     /// The country reference of the weapon, it's used to know which country can use the weapon
     ///
     /// TODO Use a custom type instead of a String
-    pub country_reference: String
+    pub country_reference: String,
 }

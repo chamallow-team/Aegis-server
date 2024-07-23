@@ -1,7 +1,7 @@
 //! This crate is used to define torpedoes
 
-use serde::{Deserialize, Serialize};
 use crate::{Damages, WeaponInformations};
+use serde::{Deserialize, Serialize};
 
 /// Enumeration representing different types of propulsion for torpedoes.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Copy, Serialize, Deserialize)]
@@ -23,11 +23,10 @@ impl TryFrom<i64> for PropulsionType {
             0 => Ok(Self::Standard),
             1 => Ok(Self::Sneaky),
             2 => Ok(Self::FuckingSilent),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
-
 
 /// Enumeration representing different types of guidance systems for torpedoes.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Copy, Serialize, Deserialize)]
@@ -52,7 +51,7 @@ impl TryFrom<i64> for GuidanceType {
             1 => Ok(Self::Sonar),
             2 => Ok(Self::Guided),
             3 => Ok(Self::AirSea),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -64,7 +63,7 @@ pub struct Torpedo {
     propulsion: PropulsionType,
 
     informations: WeaponInformations,
-    damages: Damages
+    damages: Damages,
 }
 
 impl Torpedo {
@@ -81,10 +80,11 @@ impl Torpedo {
     /// ```
     pub fn new(guidance: GuidanceType, propulsion: PropulsionType) -> Self {
         Self {
-            guidance, propulsion,
+            guidance,
+            propulsion,
 
             informations: WeaponInformations::default(),
-            damages: Damages::default()
+            damages: Damages::default(),
         }
     }
 

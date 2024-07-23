@@ -1,7 +1,7 @@
 //! This module is used to define bullets
 
-use serde::{Deserialize, Serialize};
 use crate::{Damages, WeaponInformations};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 #[repr(u8)]
@@ -42,7 +42,7 @@ impl TryFrom<i64> for BulletType {
             5 => Ok(Self::ArmorPiercingIncendiary),
             6 => Ok(Self::SabotedLightArmorPenetrator),
             7 => Ok(Self::Fragmentation),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -53,7 +53,7 @@ pub struct Bullet {
     bullet_type: BulletType,
 
     informations: WeaponInformations,
-    damages: Damages
+    damages: Damages,
 }
 
 impl Bullet {
@@ -72,7 +72,7 @@ impl Bullet {
             bullet_type,
 
             informations: WeaponInformations::default(),
-            damages: Damages::default()
+            damages: Damages::default(),
         }
     }
 

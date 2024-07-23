@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
 use crate::WeaponID;
 use crate::{Damages, WeaponInformations};
+use serde::{Deserialize, Serialize};
 
 /// Enumeration representing different types of firearms.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
@@ -32,7 +32,7 @@ pub struct FireArm {
     default_bullets: WeaponID,
 
     informations: WeaponInformations,
-    damages: Damages
+    damages: Damages,
 }
 
 impl FireArm {
@@ -53,7 +53,7 @@ impl FireArm {
             default_bullets: default_bullets.into(),
             informations: WeaponInformations::default(),
             damages: Damages::default(),
-            allowed_bullets: Vec::default()
+            allowed_bullets: Vec::default(),
         }
     }
 
@@ -87,7 +87,6 @@ impl FireArm {
     pub fn set_type(&mut self, new_type: FireArmType) {
         self.fire_arm_type = new_type;
     }
-
 
     /// Get the default bullet defined for this weapon
     ///

@@ -5,7 +5,6 @@ use std::fmt::Display;
 /// Trait for all resources
 pub trait Resource: Clone + Display + Sized + Sync {}
 
-
 /// Contain an amount of food
 ///
 /// This amount can go from 0 to infinity
@@ -20,7 +19,7 @@ pub trait Resource: Clone + Display + Sized + Sync {}
 /// ```
 #[derive(Clone, Default)]
 pub struct Food {
-    amount: u64
+    amount: u64,
 }
 
 impl Food {
@@ -34,9 +33,7 @@ impl Food {
     /// assert_eq!(food.get(), 10);
     /// ```
     pub fn new(amount: u64) -> Self {
-        Self {
-            amount
-        }
+        Self { amount }
     }
     /// Add an amount of food
     ///
@@ -106,7 +103,7 @@ impl Resource for Food {}
 /// ```
 #[derive(Clone, Default)]
 pub struct Money {
-    amount: i64
+    amount: i64,
 }
 
 impl Money {
@@ -120,9 +117,7 @@ impl Money {
     /// assert_eq!(money.get(), 10);
     /// ```
     pub fn new(amount: i64) -> Self {
-        Self {
-            amount
-        }
+        Self { amount }
     }
     /// Add an amount of money
     ///
@@ -210,7 +205,7 @@ impl Resource for Money {}
 /// ```
 #[derive(Clone, Default)]
 pub struct WorkForce {
-    amount: u64
+    amount: u64,
 }
 
 impl WorkForce {
@@ -224,9 +219,7 @@ impl WorkForce {
     /// assert_eq!(work_force.get(), 10);
     /// ```
     pub fn new(amount: u64) -> Self {
-        Self {
-            amount
-        }
+        Self { amount }
     }
     /// Add an amount of work force
     ///
@@ -306,7 +299,7 @@ impl Resource for WorkForce {}
 #[derive(Clone, Default)]
 pub struct Ores {
     uranium: u64,
-    rate_metals: u64
+    rate_metals: u64,
 }
 
 impl Ores {
@@ -323,7 +316,7 @@ impl Ores {
     pub fn new(uranium: u64, rate_metals: u64) -> Self {
         Self {
             uranium,
-            rate_metals
+            rate_metals,
         }
     }
 
@@ -450,7 +443,7 @@ impl Resource for Ores {}
 pub struct RefinedProduct {
     alloys: u64,
     chips: u64,
-    components: u64
+    components: u64,
 }
 
 impl RefinedProduct {
@@ -469,7 +462,7 @@ impl RefinedProduct {
         Self {
             alloys,
             chips,
-            components
+            components,
         }
     }
 
@@ -617,7 +610,11 @@ impl RefinedProduct {
 }
 impl Display for RefinedProduct {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "RefinedProduct({} {} {})", self.alloys, self.chips, self.components)
+        write!(
+            f,
+            "RefinedProduct({} {} {})",
+            self.alloys, self.chips, self.components
+        )
     }
 }
 impl Resource for RefinedProduct {}
@@ -638,7 +635,7 @@ impl Resource for RefinedProduct {}
 /// ```
 #[derive(Clone, Default)]
 pub struct ScientificResearch {
-    experts: Vec<Expert>
+    experts: Vec<Expert>,
 }
 
 impl ScientificResearch {
@@ -697,7 +694,8 @@ impl ScientificResearch {
     /// assert_eq!(scientific_research.get_amount(), 30);
     /// ```
     pub fn get_amount(&self) -> u64 {
-        self.experts.iter()
+        self.experts
+            .iter()
             .fold(0, |acc, expert| acc + expert.get_level() as u64)
     }
 }
@@ -724,7 +722,7 @@ impl Resource for ScientificResearch {}
 /// ```
 #[derive(Clone)]
 pub struct Expert {
-    level: u8
+    level: u8,
 }
 
 impl Expert {
@@ -760,11 +758,10 @@ impl Display for Expert {
     }
 }
 
-
 #[cfg(test)]
 mod resources_test {
     #[test]
-    fn food(){
+    fn food() {
         use super::Food;
 
         let mut food = Food::default();
@@ -782,7 +779,7 @@ mod resources_test {
     }
 
     #[test]
-    fn money(){
+    fn money() {
         use super::Money;
 
         let mut money = Money::default();
@@ -796,7 +793,7 @@ mod resources_test {
     }
 
     #[test]
-    fn work_force(){
+    fn work_force() {
         use super::WorkForce;
 
         let mut work_force = WorkForce::default();
@@ -814,7 +811,7 @@ mod resources_test {
     }
 
     #[test]
-    fn ores(){
+    fn ores() {
         use super::Ores;
 
         let mut ores = Ores::default();
@@ -842,7 +839,7 @@ mod resources_test {
     }
 
     #[test]
-    fn refined_product(){
+    fn refined_product() {
         use super::RefinedProduct;
 
         let mut refined_product = RefinedProduct::default();
@@ -881,8 +878,8 @@ mod resources_test {
     }
 
     #[test]
-    fn scientific_research(){
-        use super::{ScientificResearch, Expert};
+    fn scientific_research() {
+        use super::{Expert, ScientificResearch};
 
         let mut scientific_research = ScientificResearch::default();
         assert_eq!(scientific_research.size(), 0);
