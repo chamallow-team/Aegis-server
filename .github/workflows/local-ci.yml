@@ -1,4 +1,4 @@
-name: CI
+name: Local-CI
 
 on:
   push:
