@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "modules/buildings",
-    "modules/database", "modules/diplomacy",
+    "modules/database",
+    "modules/diplomacy",
     "modules/map",
     "modules/market",
     "modules/resources",
