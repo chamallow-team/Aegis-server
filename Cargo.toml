@@ -40,3 +40,6 @@ petgraph = "0.6.4"
 
 bevy = "0.14.0"
 bevy_mod_outline = "0.8.1"
+
+anyhow = "1.0.86"
+thiserror = "1.0.63"

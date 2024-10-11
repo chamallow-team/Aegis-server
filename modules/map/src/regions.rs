@@ -1,4 +1,4 @@
-use bevy::math::Vec2;
+use bevy::math::{Vec2, Vec3};
 use bevy::utils::HashMap;
 use petgraph::{Graph, Undirected};
 use petgraph::stable_graph::NodeIndex;
@@ -71,8 +71,8 @@ impl RegionGraphNode {
 }
 
 impl MeshNode for RegionGraphNode {
-    fn get_coordinates(&self) -> Vec2 {
-        self.coords
+    fn get_coordinates(&self) -> Vec3 {
+        Vec3::new(self.coords.x, 0.0, self.coords.y)
     }
 }
 

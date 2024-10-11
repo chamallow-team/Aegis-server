@@ -12,3 +12,5 @@ serde = { workspace = true }
 petgraph = { workspace = true, features = ["default", "serde", "serde_derive"] }
 uuid = { workspace = true, features = ["serde"] }
 serde_json = { workspace = true }
+
+delaunator = "1.0.2"
