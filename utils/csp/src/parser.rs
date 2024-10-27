@@ -1,11 +1,10 @@
+use crate::{v10, Version};
+use smol::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, BufReader as AsyncBufReader};
+use std::fmt::Display;
 use std::{
     fmt,
     io::{self, BufRead, BufReader, Read},
 };
-
-use smol::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, BufReader as AsyncBufReader};
-
-use crate::{v10, Version};
 
 // ======================= ParseErrorId =======================
 
@@ -67,7 +66,7 @@ impl ParseErrorId {
         }
     }
 
-    pub fn from_str<T: ToString>(id: T) -> Option<Self> {
+    pub fn from_string<T: ToString>(id: T) -> Option<Self> {
         let id = id.to_string().to_uppercase();
 
         match id.as_str() {
@@ -113,16 +112,16 @@ impl TryFrom<String> for ParseErrorId {
     type Error = ();
 
     fn try_from(value: String) -> Result<Self, <ParseErrorId as TryFrom<String>>::Error> {
-        match Self::from_str(value) {
+        match Self::from_string(value) {
             Some(v) => Ok(v),
             None => Err(()),
         }
     }
 }
 
-impl ToString for ParseErrorId {
-    fn to_string(&self) -> String {
-        Self::to_str(self).to_string()
+impl Display for ParseErrorId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Self::to_str(self))
     }
 }
 
@@ -149,7 +148,8 @@ impl ParseError {
 
     pub fn set_desc<S: ToString>(&mut self, p: &str, s: S) {
         if let Some(r) = self.description.find(p) {
-            self.description.replace_range(r..r + p.len(), s.to_string().as_str())
+            self.description
+                .replace_range(r..r + p.len(), s.to_string().as_str())
         }
     }
 }
@@ -272,7 +272,7 @@ impl<T: Read> Parser<T> {
     /// ```
     pub fn peek(&mut self) -> Option<u8> {
         match self.buf.fill_buf() {
-            Ok(t) if t.is_empty() => None,
+            Ok([]) => None, //  t.is_empty()
             Ok(t) => Some(t[0]),
             Err(e) if e.kind() == io::ErrorKind::Interrupted => None,
             Err(_) => None,
@@ -558,7 +558,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     /// ```
     pub async fn peek(&mut self) -> Option<u8> {
         match self.buf.fill_buf().await {
-            Ok(t) if t.is_empty() => None,
+            Ok([]) => None, // t.is_empty()
             Ok(t) => Some(t[0]),
             Err(e) if e.kind() == io::ErrorKind::Interrupted => None,
             Err(_) => None,

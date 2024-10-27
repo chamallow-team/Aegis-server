@@ -1,0 +1,3 @@
+# Server's config
+[database]
+path = "data/server.sqlite"

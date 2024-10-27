@@ -6,5 +6,22 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rust-embed = { workspace=true , features = ["include-exclude", "compression"] }
-clap = { workspace=true, features = ["derive"] }
+rust-embed = { workspace = true, features = ["include-exclude", "compression"] }
+clap = { workspace = true, features = ["derive"] }
+
+futures-channel = { workspace = true, features = ["default"] }
+tokio = { workspace = true, features = ["full"] }
+rocket = { workspace = true, features = ["default", "json"] }
+rocket_ws = { workspace = true, features = ["tokio-tungstenite"] }
+
+serde = { workspace = true, features = ["default", "serde_derive"] }
+
+tracing-subscriber = { workspace = true }
+tracing = { workspace = true }
+
+bevy_ecs = { workspace = true }
+jwt = { version = "0.16.0", features = ["openssl"] }
+
+dotenv = { version = "0.15.0", features = ["clap"] }
+sha2 = { workspace = true, features = ["default"] }
+sqlx = { workspace = true, features = ["default", "sqlite"] }

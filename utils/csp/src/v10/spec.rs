@@ -1,3 +1,4 @@
+use std::fmt::Display;
 // see /doc/csp/v1.0.md
 use std::io::Read;
 
@@ -292,9 +293,9 @@ impl CspHeader for Header {
     }
 }
 
-impl ToString for Header {
-    fn to_string(&self) -> String {
-        Self::to_str(self).to_string()
+impl Display for Header {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Self::to_str(self))
     }
 }
 
@@ -552,9 +553,9 @@ impl TryFrom<u8> for Method {
     }
 }
 
-impl ToString for Method {
-    fn to_string(&self) -> String {
-        Self::to_str(self).to_string()
+impl Display for Method {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Self::to_str(self))
     }
 }
 
@@ -699,9 +700,9 @@ impl CspControl for Control {
     }
 }
 
-impl ToString for Control {
-    fn to_string(&self) -> String {
-        Self::to_str(self).to_string()
+impl Display for Control {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Self::to_str(self))
     }
 }
 

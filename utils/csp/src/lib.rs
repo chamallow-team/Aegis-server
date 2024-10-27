@@ -1,4 +1,5 @@
 use queue::Queue;
+use std::fmt::Display;
 
 // === exports ===
 // csp versions
@@ -70,9 +71,9 @@ impl Version {
     }
 }
 
-impl ToString for Version {
-    fn to_string(&self) -> String {
-        Self::to_str(self).to_string()
+impl Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Self::to_str(self))
     }
 }
 
