@@ -1,10 +1,11 @@
 mod api;
+mod database;
 
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
-use sqlx::{ConnectOptions, Connection, Executor};
+use sqlx::{ConnectOptions, Connection};
+use std::env;
 use std::path::Path;
-use std::str::FromStr;
 use tracing::{error, info, trace, warn};
 
 #[derive(Parser, Debug)]
@@ -24,6 +25,8 @@ enum Command {
     },
     #[clap(name = "init", about = "Initialize the database")]
     Init,
+    #[clap(name = "version", about = "The version of the server")]
+    Version,
 }
 
 #[tokio::main]
@@ -34,6 +37,10 @@ async fn main() {
     match config.command {
         Command::LaunchConfig { port, address } => launch_server(port, address).await,
         Command::Init => init_server().await,
+        Command::Version => match env::var("AEGIS_VERSION").ok() {
+            Some(v) => println!("{v}"),
+            None => println!("An error occurred while retrieving the version"),
+        },
     }
 }
 

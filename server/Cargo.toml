@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 rust-embed = { workspace = true, features = ["include-exclude", "compression"] }
 clap = { workspace = true, features = ["derive"] }
+chrono = { workspace = true, features = ["default"] }
 
 futures-channel = { workspace = true, features = ["default"] }
 tokio = { workspace = true, features = ["full"] }
@@ -21,7 +22,9 @@ tracing = { workspace = true }
 
 bevy_ecs = { workspace = true }
 jwt = { version = "0.16.0", features = ["openssl"] }
+hmac = { version = "0.12.1", features = ["std"] }
+hex = { version = "0.4.3", features = ["std", "serde"] }
 
 dotenv = { version = "0.15.0", features = ["clap"] }
 sha2 = { workspace = true, features = ["default"] }
-sqlx = { workspace = true, features = ["default", "sqlite"] }
+sqlx = { workspace = true, features = ["default", "sqlite", "runtime-tokio"] }
