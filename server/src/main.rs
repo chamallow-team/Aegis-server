@@ -1,4 +1,5 @@
 mod api;
+mod core;
 mod database;
 
 use clap::{Parser, Subcommand};
@@ -112,6 +113,9 @@ async fn launch_server(port: u16, address: String) {
         std::process::exit(1);
     }
 
+    let core = core::create_core_game().await;
+
+    let core_handle = tokio::spawn(async move { core.launch().await });
     let server_handle = tokio::spawn(async move { api::server((port, address)).await });
 
     //
@@ -119,6 +123,8 @@ async fn launch_server(port: u16, address: String) {
     //  SERVER END
     //
     //
+
+    core_handle.await.expect("Game core failed to start");
 
     server_handle
         .await
