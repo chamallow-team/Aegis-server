@@ -20,7 +20,7 @@ pub struct Packet {
     data: Vec<u8>,
 }
 
-const DEFAULT_HEADER_FILLER: std::option::Option<spec::Header> = None;
+const DEFAULT_HEADER_FILLER: Option<Header> = None;
 impl CspPacket for Packet {
     type HEADER = Header;
     type METHOD = Method;
@@ -142,7 +142,7 @@ impl CspPacket for Packet {
 
     fn parse(
         &mut self,
-        parser: &mut crate::parser::Parser<impl std::io::Read>,
+        parser: &mut crate::parser::Parser<impl Read>,
     ) -> crate::parser::ParseResult<usize> {
         parser.reset();
         self.clear();
@@ -257,11 +257,9 @@ mod tests {
         );
         assert_eq!(packet.method(), Some(Method::Connect));
 
-        packet.set_headers(&vec![
-            Header::Id(1),
+        packet.set_headers(&[Header::Id(1),
             Header::Server(110),
-            Header::Compressed(false),
-        ]);
+            Header::Compressed(false)]);
 
         packet.pop_header("length");
 
@@ -270,7 +268,7 @@ mod tests {
                 Header::Server(e) => assert_eq!(e, 110),
                 Header::Identity(e) => assert_eq!(e, "abcde".to_string()),
                 Header::Id(e) => assert_eq!(e, 1),
-                Header::Compressed(e) => assert_eq!(e, false),
+                Header::Compressed(e) => assert!(!e),
                 _ => panic!("Wrong packet header {:?}", packet),
             }
         }
@@ -313,11 +311,9 @@ mod tests {
         let mut packet = Packet::new();
 
         packet.set_method(Method::Connect);
-        packet.set_headers(&vec![
-            Header::Update(true),
+        packet.set_headers(&[Header::Update(true),
             Header::Server(45),
-            Header::Identity("abcde".to_string()),
-        ]);
+            Header::Identity("abcde".to_string())]);
 
         let user = User {
             username: "little endian".to_string(),

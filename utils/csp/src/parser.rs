@@ -1,3 +1,5 @@
+#![allow(clippy::zero_prefixed_literal)]
+
 use crate::{v10, Version};
 use smol::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, BufReader as AsyncBufReader};
 use std::fmt::Display;
@@ -10,16 +12,16 @@ use std::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ParseErrorId {
-    /// duplicated headers are forbiden
+    /// duplicated headers are forbidden
     DupHeader,
     /// headers have statics value between 32 and 255 (u8 max)
-    /// only a few are valid depending of the csp version
+    /// only a few are valid depending on the csp version
     UkwnHeader,
     /// single byte headers value have statics value between 32 and 255 (u8 max)
-    /// only a few are valid depending of the csp version and header
+    /// only a few are valid depending on the csp version and header
     UkwnHeaderVal,
     /// controls have statics value between 1 and 31
-    /// only a few are valid depending of the csp version
+    /// only a few are valid depending on the csp version
     UkwnCtrl,
     /// sometimes, controls are expected, such in a string, data start...
     MissCtrl,
@@ -29,15 +31,15 @@ pub enum ParseErrorId {
     UnxptCtrl,
     /// invalid number, mostly caused by EOF before fully reading an n bytes number
     InvNum,
-    /// invalid Length header and data length, they should be roughtly the same
+    /// invalid Length header and data length, they should be roughly the same
     InvDataLen,
     /// invalid data compression
     InvDataComp,
-    /// motly caused by an invalid utf-8 string
+    /// mostly caused by an invalid utf-8 string
     InvStr,
     /// when the packet took to long to be gathered
     TimedOut,
-    /// for all error that don't have an id to report
+    /// for all errors that don't have an id to report
     Unknown,
 
     // not sent to the client, only used internally
@@ -120,7 +122,7 @@ impl TryFrom<String> for ParseErrorId {
 }
 
 impl Display for ParseErrorId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Self::to_str(self))
     }
 }
@@ -133,7 +135,7 @@ pub struct ParseError {
     pub id: ParseErrorId,
     /// description, used for debugging, or reporting the error to the user
     pub description: String,
-    /// same use as description, to report where the error occured
+    /// same use as description, to report where the error occurred
     pub pos: usize,
 }
 
@@ -154,7 +156,7 @@ impl ParseError {
     }
 }
 
-impl fmt::Display for ParseError {
+impl Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -164,7 +166,7 @@ impl fmt::Display for ParseError {
     }
 }
 
-pub type ParseResult<R> = std::result::Result<R, ParseError>;
+pub type ParseResult<R> = Result<R, ParseError>;
 
 // ======================= Parser =======================
 
@@ -187,7 +189,7 @@ impl<T: Read> Parser<T> {
     /// ```
     /// let reader1: &[u8] = &[3, 49, 46, 48, 46, 51, 4];
     /// let reader2 = std::fs::File::open("Cargo.toml").expect("cargo.toml: no file or directory");
-    /// // # that works too
+    /// // # that works to
     /// // let reader3 = std::new::TcpStream::connect("127.0.0.0:8080")
     /// //    .expect("failed to open connection to 127.0.0.0:8080");
     ///  
@@ -202,8 +204,8 @@ impl<T: Read> Parser<T> {
         }
     }
 
-    /// read exactly `size` bytes, unless the reader hit EOF, where it return the last bytes
-    /// when reading 0 bytes, that means that the reader has no longer data
+    /// read exactly `size` bytes, unless the reader hit EOF, where it returns the last bytes
+    /// when reading zero bytes, that means that the reader has no longer data
     /// -> on TcpStream, that means the connection has been closed
     ///
     /// # Arguments
@@ -237,7 +239,9 @@ impl<T: Read> Parser<T> {
                 Err(e) if e.kind() == io::ErrorKind::Interrupted => {}
                 Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
                     // normally implemented where timout of reader.set_read_timout() hit
-                    // on a parser, it indicate that we should not wait for more data as it'll likelly not come
+                    // on a parser, it indicates
+                    // that we should not wait for more data
+                    // as it'll likely not come
                     // (at least for the current packet)
                     return Err(ParseError::new(ParseErrorId::TimedOut, self.pos()));
                 }
@@ -259,7 +263,7 @@ impl<T: Read> Parser<T> {
 
     /// peek the buffer for more data
     ///
-    /// usefull when attempting to wait for a packet without consumming the buffer
+    /// usefully when attempting to wait for a packet without consuming the buffer
     ///
     /// # Example
     /// ```
@@ -354,7 +358,7 @@ impl<T: Read> Parser<T> {
         }
     }
 
-    /// read 4 bytes and parse them as little endian u32
+    /// read four bytes and parse them as little endian u32
     ///
     /// # Example
     /// ```
@@ -377,7 +381,7 @@ impl<T: Read> Parser<T> {
         Ok(u32::from_le_bytes(bytes))
     }
 
-    /// read 8 bytes and parse them as little endian u64
+    /// read eight bytes and parse them as little endian u64
     ///
     /// # Example
     /// ```
@@ -409,7 +413,7 @@ impl<T: Read> Parser<T> {
     ///
     /// assert_eq!(parser.pos(), 0);
     ///
-    /// parser.read(3);
+    /// parser.read(3).expect("Cannot read from the parser");
     /// assert_eq!(parser.pos(), 3);
     /// ```
     pub fn pos(&self) -> usize {
@@ -417,7 +421,7 @@ impl<T: Read> Parser<T> {
     }
 
     /// reset the parser's cursor and return the old cursor
-    /// used when a packet is parsed and we want to reuse the parser for parsing other packets
+    /// used when a packet is parsed, and we want to reuse the parser for parsing other packets
     ///
     /// # Example
     /// ```
@@ -426,7 +430,7 @@ impl<T: Read> Parser<T> {
     ///
     /// assert_eq!(parser.pos(), 0);
     ///
-    /// parser.read(3);
+    /// parser.read(3).expect("Cannot read from the parser");
     /// assert_eq!(parser.pos(), 3);
     ///
     /// assert_eq!(parser.reset(), 3);
@@ -438,7 +442,7 @@ impl<T: Read> Parser<T> {
         s
     }
 
-    /// get the version that the parser use
+    /// get the version that the parser uses
     pub fn version(&self) -> Version {
         self.version
     }
@@ -464,14 +468,14 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     /// create a new async parser
     ///
     /// # Arguments
-    /// * `reader` - a type that implement AsyncRead
+    /// * `reader` - a type that implements AsyncRead
     ///
     /// # Example
     /// ```
     /// smol::block_on( async {
     ///     let reader1: &[u8] = &[3, 49, 46, 48, 46, 51, 4];
     ///     let reader2 = smol::fs::File::open("Cargo.toml").await.expect("cargo.toml: no file or directory");
-    ///     // # that works too
+    ///     // # that works to
     ///     // let reader2 = soml::net::TcpStream::connect("127.0.0.0:8080").await
     ///     //    .expect("failed to open connection to 127.0.0.0:8080");
     ///  
@@ -487,8 +491,8 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
         }
     }
 
-    /// read exactly `size` bytes, unless the reader hit EOF, where it return the last bytes
-    /// when reading 0 bytes, that means that the reader has no longer data
+    /// read exactly `size` bytes, unless the reader hit EOF, where it returns the last bytes
+    /// when reading zero bytes, that means that the reader has no longer data
     /// -> on TcpStream, that means the connection has been closed
     ///
     /// # Arguments
@@ -522,7 +526,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
                     slice = &mut tmp[n..];
                 }
                 Err(e) if e.kind() == io::ErrorKind::Interrupted => {
-                    // FIXME: does async read thow ErrorKind::Interrupted ?
+                    // FIXME: does async read throw ErrorKind::Interrupted ?
                 }
                 Err(e) if e.kind() == io::ErrorKind::ConnectionReset => {
                     return Err(ParseError::new(ParseErrorId::ConnectionClosed, self.pos()))
@@ -543,7 +547,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
 
     /// peek the buffer for more data
     ///
-    /// usefull when attempting to wait for a packet without consumming the buffer
+    /// usefully when attempting to wait for a packet without consuming the buffer
     ///
     /// # Example
     /// ```
@@ -644,7 +648,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
         }
     }
 
-    /// read 4 bytes and parse them as little endian u32
+    /// read four bytes and parse them as little endian u32
     ///
     /// # Example
     /// ```
@@ -669,7 +673,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
         Ok(u32::from_le_bytes(bytes))
     }
 
-    /// read 8 bytes and parse them as little endian u64
+    /// read eight bytes and parse them as little endian u64
     ///
     /// # Example
     /// ```
@@ -704,7 +708,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     ///
     ///     assert_eq!(parser.pos(), 0);
     ///
-    ///     parser.read(3).await;
+    ///     parser.read(3).await.expect("Cannot read from the parser");
     ///     assert_eq!(parser.pos(), 3);
     /// } )
     /// ```
@@ -713,7 +717,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     }
 
     /// reset the parser's cursor and return the old cursor
-    /// used when a packet is parsed and we want to reuse the parser for parsing other packets
+    /// used when a packet is parsed, and we want to reuse the parser for parsing other packets
     ///
     /// # Example
     /// ```
@@ -723,7 +727,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
     ///
     ///     assert_eq!(parser.pos(), 0);
     ///
-    ///     parser.read(3).await;
+    ///     parser.read(3).await.expect("Cannot read from the parser");
     ///     assert_eq!(parser.pos(), 3);
     ///
     ///     assert_eq!(parser.reset(), 3);
@@ -736,7 +740,7 @@ impl<T: AsyncRead + Unpin> AsyncParser<T> {
         s
     }
 
-    /// get the version that the parser use
+    /// get the version that the parser uses
     pub fn version(&self) -> Version {
         self.version
     }
@@ -862,7 +866,7 @@ mod tests {
     }
 
     #[test]
-    fn asnyc_parse_byte() {
+    fn async_parse_byte() {
         smol::block_on(async {
             let reader: &[u8] = &[32];
 

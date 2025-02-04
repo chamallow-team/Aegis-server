@@ -1,3 +1,5 @@
+#![allow(clippy::zero_prefixed_literal)]
+
 use std::fmt::Display;
 // see /doc/csp/v1.0.md
 use std::io::Read;
@@ -18,15 +20,15 @@ pub enum Header {
     /// the length of data if associated.
     ///
     /// Should be exactly the same length, if not, the data can be wrongly parsed,
-    /// or the packet can be concidered as corrupted
+    /// or the packet can be considered as corrupted
     Length(u64),
-    /// Crediential of the Client
+    /// Credential of the Client
     ///
     /// Used to "identify" a client, or to quickly authenticate
     Identity(String),
     /// Version of the client
     ///
-    /// Server can accept or reject a Client based of this header
+    /// Server can accept or reject a Client based on this header
     Client(String),
     /// Used by the client to get an update of the Server's configuration...
     ///
@@ -34,13 +36,14 @@ pub enum Header {
     Update(bool),
     /// Id of the packet
     ///
-    /// This is used when the packet awaits a response (eg Action Method), the other end will respond with a packet using the same id
+    /// This is used when the packet awaits a response (e.g., Action Method);
+    /// the other end will respond with a packet using the same id
     /// If a response is not provided, the packet is resend after a period of time
     Id(u64),
-    /// used primally by the server with the Disconnect method
+    /// used primarily by the server with the Disconnect method
     ///
-    /// this allow the TCP connection to be kept open and at the same time totally reset the connection
-    /// This includes the auth, the awaitings packets, buffers, the states...
+    /// this allows the TCP connection to be kept open and at the same time totally reset the connection
+    /// This includes the auth, the awaiting packets, buffers, the states...
     Reconnect(bool),
     /// if a data part is compressed
     ///
@@ -98,7 +101,7 @@ impl CspHeader for Header {
         }
     }
 
-    /// return the str representation of an header
+    /// return the str representation of a header
     ///
     /// # Example
     /// ```
@@ -121,7 +124,7 @@ impl CspHeader for Header {
         }
     }
 
-    /// parse a byte to it's header representation with default value
+    /// parse a byte to its header representation with default value
     ///
     /// # Example
     /// ```
@@ -145,7 +148,7 @@ impl CspHeader for Header {
         }
     }
 
-    /// return the byte representation of an header
+    /// return the byte representation of a header
     ///
     /// # Example
     /// ```
@@ -168,7 +171,7 @@ impl CspHeader for Header {
         }
     }
 
-    /// return the buffer of the header (header + value)
+    /// return the buffer of the header (header and value)
     ///
     /// # Example
     /// ```
@@ -251,7 +254,7 @@ impl CspHeader for Header {
         }
     }
 
-    /// parser a buffer to a header + it's value from a async parser
+    /// parser a buffer to a header + it's value from an async parser
     ///
     /// # Example
     /// ```
@@ -391,31 +394,33 @@ pub enum Method {
     Connect,
     /// Request or try an authentification
     ///
-    /// this allow the Client to get his identity
-    /// this steps can be avoided with an identity header on the connect packet
+    /// this allows the Client to get his identity
+    /// this steps can be avoided with an identity header on the connected packet
     Auth,
     /// disconnect from the Client/Server
     ///
-    /// used for various reasons, such as resetting the connection after getting a corrupted packet (which invalidate the whole tcp buffer)
+    /// used for various reasons,
+    /// such as resetting the connection after getting a corrupted packet
+    /// (which invalidates the whole tcp buffer)
     /// or just closing the Client/Server
     Disconnect,
     /// Perform an admin action
     ///
-    /// It's separated from Action to easily filters real admins
+    /// It's separated from Action to easily filter real admins
     Admin,
     /// Send from the Server, used to provide new information about the game
     ///
-    /// When an unit moves, a message is received, ect...
+    /// When a unit moves, a message is received, ect...
     Update,
-    /// the Client perform an action
+    /// the Client performs an action
     ///
-    /// Building something, moving an unit, ect...
+    /// Building something, moving a unit, ect...
     Action,
-    /// send a Error packet
+    /// send an Error packet
     ///
-    /// Usually send as a response of a packet
+    /// Usually send it as a response to a packet
     Error,
-    /// send for getting the initial state of something or send files
+    /// send it for getting the initial state of something or send files
     ///
     /// usually used to send large data such as the game's state (maps, units, messages...)
     /// it can be used to send chunks of information using the id header
@@ -447,7 +452,7 @@ impl CspMethod for Method {
         crate::Version::V10
     }
 
-    /// parse a byte to it's method representation with default value
+    /// parse a byte to its method representation with default value
     ///
     /// # Example
     /// ```
@@ -471,7 +476,7 @@ impl CspMethod for Method {
         }
     }
 
-    /// return the byte representation of an method
+    /// return the byte representation of a method
     ///
     /// # Example
     /// ```
@@ -586,15 +591,15 @@ impl From<Method> for &str {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Control {
-    /// Ends of an header part.
+    /// Ends of a header part.
     ///
-    /// If no Length header have been found, then the Packet ends here, otherwise, a DataStart control
+    /// If no Length header has been found, then the Packet ends here, otherwise, a DataStart control
     /// shall be found next, and using the Length header, the data is parsed
     HeaderEnd,
     /// Starts of a string
     ///
     /// This special control is used to define the start of an unknown length value, named string, and is associated
-    /// to a fiew Headers.
+    /// with a few Headers.
     StringStart,
     /// Ends of a string
     ///
@@ -627,7 +632,7 @@ impl CspControl for Control {
         crate::Version::V10
     }
 
-    /// parse a byte to it's Control representation
+    /// parse a byte to its Control representation
     ///
     /// # Example
     /// ```
@@ -772,10 +777,7 @@ mod tests {
             assert_eq!(byte, header.to_u8(), "at byte {byte}");
             assert_eq!(
                 header,
-                header_str.to_string().try_into().expect(
-                    format!("at byte {byte}, failed to serialize {header_str} from string")
-                        .as_str()
-                ),
+                header_str.to_string().try_into().unwrap_or_else(|_| panic!("at byte {byte}, failed to serialize {header_str} from string")),
                 "at byte {byte}"
             );
 
@@ -941,10 +943,7 @@ mod tests {
             assert_eq!(byte, method.to_u8(), "at byte {byte}");
             assert_eq!(
                 method,
-                method_str.to_string().try_into().expect(
-                    format!("at byte {byte}, failed to serialize {method_str} from string")
-                        .as_str()
-                ),
+                method_str.to_string().try_into().unwrap_or_else(|_| panic!("at byte {byte}, failed to serialize {method_str} from string")),
                 "at byte {byte}"
             );
         }
@@ -964,10 +963,7 @@ mod tests {
             assert_eq!(byte, control.to_u8(), "at byte {byte}");
             assert_eq!(
                 control,
-                control_str.to_string().try_into().expect(
-                    format!("at byte {byte}, failed to serialize {control_str} from string")
-                        .as_str()
-                ),
+                control_str.to_string().try_into().unwrap_or_else(|_| panic!("at byte {byte}, failed to serialize {control_str} from string")),
                 "at byte {byte}"
             );
         }
