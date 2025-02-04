@@ -103,6 +103,8 @@ impl Default for Version {
 // ======================= PacketHandler =======================
 
 pub struct PacketqHandler {
+    #[allow(dead_code)]
     reicv_queue: Queue,
+    #[allow(dead_code)]
     send_queue: Queue,
 }
