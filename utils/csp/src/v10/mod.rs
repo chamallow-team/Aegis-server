@@ -257,9 +257,11 @@ mod tests {
         );
         assert_eq!(packet.method(), Some(Method::Connect));
 
-        packet.set_headers(&[Header::Id(1),
+        packet.set_headers(&[
+            Header::Id(1),
             Header::Server(110),
-            Header::Compressed(false)]);
+            Header::Compressed(false),
+        ]);
 
         packet.pop_header("length");
 
@@ -311,9 +313,11 @@ mod tests {
         let mut packet = Packet::new();
 
         packet.set_method(Method::Connect);
-        packet.set_headers(&[Header::Update(true),
+        packet.set_headers(&[
+            Header::Update(true),
             Header::Server(45),
-            Header::Identity("abcde".to_string())]);
+            Header::Identity("abcde".to_string()),
+        ]);
 
         let user = User {
             username: "little endian".to_string(),

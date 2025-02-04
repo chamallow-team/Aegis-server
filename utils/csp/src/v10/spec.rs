@@ -777,7 +777,9 @@ mod tests {
             assert_eq!(byte, header.to_u8(), "at byte {byte}");
             assert_eq!(
                 header,
-                header_str.to_string().try_into().unwrap_or_else(|_| panic!("at byte {byte}, failed to serialize {header_str} from string")),
+                header_str.to_string().try_into().unwrap_or_else(|_| panic!(
+                    "at byte {byte}, failed to serialize {header_str} from string"
+                )),
                 "at byte {byte}"
             );
 
@@ -943,7 +945,9 @@ mod tests {
             assert_eq!(byte, method.to_u8(), "at byte {byte}");
             assert_eq!(
                 method,
-                method_str.to_string().try_into().unwrap_or_else(|_| panic!("at byte {byte}, failed to serialize {method_str} from string")),
+                method_str.to_string().try_into().unwrap_or_else(|_| panic!(
+                    "at byte {byte}, failed to serialize {method_str} from string"
+                )),
                 "at byte {byte}"
             );
         }
@@ -963,7 +967,12 @@ mod tests {
             assert_eq!(byte, control.to_u8(), "at byte {byte}");
             assert_eq!(
                 control,
-                control_str.to_string().try_into().unwrap_or_else(|_| panic!("at byte {byte}, failed to serialize {control_str} from string")),
+                control_str
+                    .to_string()
+                    .try_into()
+                    .unwrap_or_else(|_| panic!(
+                        "at byte {byte}, failed to serialize {control_str} from string"
+                    )),
                 "at byte {byte}"
             );
         }

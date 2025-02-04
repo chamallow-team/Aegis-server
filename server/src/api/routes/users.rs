@@ -78,7 +78,7 @@ struct Signup {
 }
 
 #[post("/signup", data = "<signup>")]
-async fn signup_route<'a, 'b>(
+async fn signup_route(
     db: &DbState,
     secret_key: &SecretKeyState,
     signup: Json<Signup>,
