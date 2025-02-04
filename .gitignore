@@ -7,3 +7,4 @@ doc/.idea
 
 .env
 aegis
+count_lines.js

@@ -1,0 +1,16 @@
+[shard]
+shell_type = 4 # ArmorPiecingDiscardingSabot
+
+[shard.informations]
+name = "Shard APDS"
+caliber = 155
+speed = -1
+range = 20
+country_reference = "fr"
+
+[shard.damages]
+building = 0.1
+infantry = 0.2
+vehicle = 3.0
+armored_vehicle = 5.0
+tank = 7.0
