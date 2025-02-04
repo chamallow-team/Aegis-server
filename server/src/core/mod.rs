@@ -37,7 +37,7 @@ impl GameCore {
         self.world.run_schedule(StartSchedule);
 
         let mut tick = 0;
-        while true {
+        loop {
             tick += 1;
 
             println!("Tick n°{tick}");
@@ -62,6 +62,7 @@ impl GameCore {
 
 #[derive(Component, Debug)]
 pub struct NavyShip {
+    #[allow(dead_code)]
     model: u16,
 }
 
