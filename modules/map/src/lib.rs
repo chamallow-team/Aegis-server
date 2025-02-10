@@ -4,31 +4,63 @@ pub mod regions;
 
 #[cfg(test)]
 mod test {
-    use crate::generation::terrain::modifiers;
-    use crate::generation::{self, terrain};
+    use crate::generation;
+    use crate::generation::biomes;
     use fastnoise2::SafeNode;
     use image::{GrayImage, Luma};
     use std::time::Instant;
 
     #[test]
     fn create_noise() {
-        let node = SafeNode::from_encoded_node_tree(generation::encoded_tree_versions::V1)
-            .expect("Failed to build Node tree from encoded tree");
+        const FREQUENCY: f32 = 0.008;
+        const ELEVATION_SEED: i32 = 1337;
+
+        let biomes_node =
+            SafeNode::from_encoded_node_tree(generation::encoded_tree_versions::v1::BIOMES)
+                .expect("Failed to build biomes Node tree from encoded tree");
 
         let (x_size, y_size) = (2000, 1000);
 
+        println!("Generating biomes and terrain...");
         let start = Instant::now();
-        let (min_max, mut noise) = terrain::generate_terrain(&node, (x_size, y_size), 0.008, 14679);
+
+        let config = biomes::v1::BiomeConfig {
+            elevation_seed: ELEVATION_SEED,
+            temperature_seed: 456,
+            humidity_seed: 789,
+            frequency: FREQUENCY,
+            size: (x_size, y_size),
+        };
+        let (biomes, elev, temp, hum) = biomes::v1::full_biome_generation(&biomes_node, &config);
+
         let elapsed = start.elapsed();
 
-        terrain::apply_boundaries(&mut noise, modifiers::v1::boundaries);
+        // Normalize biomes buffer
+        let biomes_normalized = biomes
+            .iter()
+            .map(|b| b.normalized_value())
+            .collect::<Vec<f32>>();
 
         println!(
-            "Took {elapsed:?} to generate {} values ({}/s): {min_max:?}",
-            noise.len(),
-            noise.len() as f32 / elapsed.as_secs_f32()
+            "Biomes: Took {elapsed:?} to generate {} values ({}/s)",
+            biomes.len(),
+            biomes.len() as f32 / elapsed.as_secs_f32()
         );
 
+        let img = generate_image((x_size, y_size), &biomes_normalized);
+        save(img, "biomes.png");
+
+        let img = generate_image((x_size, y_size), &elev);
+        save(img, "elevation.png");
+
+        let img = generate_image((x_size, y_size), &temp);
+        save(img, "temperature.png");
+
+        let img = generate_image((x_size, y_size), &hum);
+        save(img, "humidity.png");
+    }
+
+    fn generate_image((x_size, y_size): (i32, i32), noise: &[f32]) -> GrayImage {
         let mut img = GrayImage::new(x_size as u32, y_size as u32);
         for x in 0..x_size {
             for y in 0..y_size {
@@ -40,7 +72,7 @@ mod test {
             }
         }
 
-        save(img, "test_fastnoise.png")
+        img
     }
 
     fn save(img: GrayImage, filename: &str) {
