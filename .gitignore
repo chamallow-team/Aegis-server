@@ -4,3 +4,6 @@ Cargo.lock
 .vscode
 doc/.idea
 count_lines.js
+
+.env
+aegis/

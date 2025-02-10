@@ -43,3 +43,5 @@ bevy_mod_outline = "0.8.1"
 
 anyhow = "1.0.86"
 thiserror = "1.0.63"
+
+fastnoise-lite = "1.1.1"
