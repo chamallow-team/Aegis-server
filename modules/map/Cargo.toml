@@ -6,14 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { workspace = true }
-bevy_mod_outline = { workspace = true }
 serde = { workspace = true }
 petgraph = { workspace = true, features = ["default", "serde", "serde_derive"] }
 uuid = { workspace = true, features = ["serde"] }
 serde_json = { workspace = true }
 
-delaunator = "1.0.2"
-
-fastnoise2 = { version = "0.3.1", features = ["build-from-source"] }
 image = { version = "0.24.9", features = ["png", "jpeg"] }
+
+voronator = { version = "0.2.1", features = ["default", "rayon"] }
+
+thiserror = "2.0.12"

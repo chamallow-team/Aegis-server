@@ -1,27 +1,47 @@
-use fastnoise2::{OutputMinMax, SafeNode};
+mod terrain;
 
-pub mod biomes;
-
-pub fn generate_layer(
-    node: &SafeNode,
-    size: (i32, i32),
-    frequency: f32,
-    seed: i32,
-) -> (OutputMinMax, Vec<f32>) {
-    let (x, y) = size;
-    let mut data = vec![0.0; (x * y) as usize];
-
-    let min_max = node.gen_uniform_grid_2d(&mut data, -x / 2, -y / 2, x, y, frequency, seed);
-
-    (min_max, data)
+pub struct WorldGenerator {
+    width: u64,
+    height: u64,
+    terrain: terrain::PolygonGraph,
 }
 
-pub mod encoded_tree_versions {
+impl WorldGenerator {
+    pub fn new(width: u64, height: u64) -> Result<Self, crate::errors::MapError> {
+        Ok(Self {
+            terrain: terrain::generate_grid(width, height)?,
+            width,
+            height,
+        })
+    }
+}
 
-    pub mod v1 {
-        pub const TERRAIN: &str =
-            "DgACAAAAAAAAABMAzczMPQ0ABwAAAAAAIEAJAABmZiY/AAAAAD8AexSuQAD2KNw/AK5HQUA=";
-        pub const BIOMES: &str =
-            "IgCF64FAAAAAAA4AAgAAAAAAAAATAI/CdT0NAAcAAAAAACBACQAAZmYmPwAAAAA/AHsUrkAA9ijcPwCuR0FA";
+#[derive(Debug, Clone, Copy)]
+pub enum Material {
+    Rock,
+    Sand,
+    Grass,
+    Dirt,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Vegetation {
+    Desert,
+    Grassland,
+    Forest,
+    Tundra,
+}
+
+#[cfg(test)]
+mod test {
+    use crate::generation::WorldGenerator;
+    use std::time::Instant;
+
+    #[test]
+    fn test() {
+        let mut n = Instant::now();
+        let world = WorldGenerator::new(2000, 1000);
+        println!("Generated generator time: {:?}", n.elapsed());
+        n = Instant::now();
     }
 }
