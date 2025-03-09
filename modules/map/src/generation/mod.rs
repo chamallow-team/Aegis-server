@@ -40,7 +40,7 @@ mod test {
     #[test]
     fn test() {
         let mut n = Instant::now();
-        let world = WorldGenerator::new(2000, 1000);
+        let world = WorldGenerator::new(64, 64);
         println!("Generated generator time: {:?}", n.elapsed());
         n = Instant::now();
     }

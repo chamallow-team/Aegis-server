@@ -72,7 +72,7 @@ impl Vector<Self> for Vertex {}
 
 /// The type of Node, used to differentiate the Voronoi cell center from the corners
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, Ord, PartialOrd)]
-enum NodeType {
+pub(crate) enum NodeType {
     #[default]
     VoronoiCenter,
     VoronoiCorner,
@@ -101,7 +101,7 @@ pub(crate) fn generate_grid(width: u64, height: u64) -> Result<PolygonGraph, Map
             let offset = if y % 2 == 0 { 0.0 } else { size / 2.0 };
             let center = Vertex {
                 x: x as f64 * size + offset,
-                y: y as f64 * size * (3.0_f64).sqrt() / 2.0,
+                y: y as f64 * size * 3.0_f64.sqrt() / 2.0,
             };
             grid_graph.add_node(Polygon {
                 center,
