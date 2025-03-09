@@ -16,3 +16,4 @@ image = { version = "0.24.9", features = ["png", "jpeg"] }
 voronator = { version = "0.2.1", features = ["default", "rayon"] }
 
 thiserror = "2.0.12"
+rand = { workspace = true, features = ["default"] }

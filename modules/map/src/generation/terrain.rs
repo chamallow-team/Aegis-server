@@ -1,6 +1,7 @@
 use crate::errors::MapError;
 use petgraph::prelude::NodeIndex;
 use petgraph::Undirected;
+use rand::Rng;
 use std::cmp::PartialEq;
 use std::ops::{Add, Div, Mul, Sub};
 use voronator::delaunator::{Coord, Vector};
@@ -95,14 +96,21 @@ pub(crate) fn generate_grid(width: u64, height: u64) -> Result<PolygonGraph, Map
     // Size of a single cell
     let size = 1.0;
 
+    let mut rng = rand::thread_rng();
+    let perturbation = 0.25;
+
     // generate the grid
     for y in 0..height {
         for x in 0..width {
             let offset = if y % 2 == 0 { 0.0 } else { size / 2.0 };
-            let center = Vertex {
+            let mut center = Vertex {
                 x: x as f64 * size + offset,
                 y: y as f64 * size * 3.0_f64.sqrt() / 2.0,
             };
+
+            center.x += rng.gen_range(-perturbation..perturbation);
+            center.y += rng.gen_range(-perturbation..perturbation);
+
             grid_graph.add_node(Polygon {
                 center,
                 node_type: NodeType::VoronoiCenter,
@@ -190,12 +198,12 @@ fn create_combined_graph(diagram: &VoronoiDiagram<Vertex>) -> PolygonGraph {
     }
 
     // Connect all corner vertex's to their center
-    for (cell_index, corners) in cell_corners.iter().enumerate() {
-        let center_index = diagram_centers[cell_index];
-        for corner_index in corners {
-            graph.add_edge(center_index, *corner_index, ());
-        }
-    }
+    // for (cell_index, corners) in cell_corners.iter().enumerate() {
+    //     let center_index = diagram_centers[cell_index];
+    //     for corner_index in corners {
+    //         graph.add_edge(center_index, *corner_index, ());
+    //     }
+    // }
 
     let graph_capacity = graph.capacity();
     println!(
