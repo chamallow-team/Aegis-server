@@ -143,12 +143,11 @@ mod test {
     fn test() {
         std::fs::create_dir_all(std::env::temp_dir().join("aegis")).unwrap();
 
-        let mut n = Instant::now();
+        let n = Instant::now();
         let world = WorldGenerator::new(64, 64).expect("Cannot generate base world");
         println!("Generated generator time: {:?}", n.elapsed());
         world
             .generate_image("aegis/aegis_map_gen.png")
             .expect("Cannot generate image");
-        n = Instant::now();
     }
 }

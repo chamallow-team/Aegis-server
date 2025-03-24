@@ -82,6 +82,7 @@ pub(crate) enum NodeType {
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Polygon {
     pub center: Vertex,
+    #[allow(unused)]
     pub node_type: NodeType,
 }
 
