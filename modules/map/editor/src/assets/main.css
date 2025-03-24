@@ -7,3 +7,6 @@
     --color-primary-400: oklch(0.55 0.11 230); /* #778DA9 */
     --color-neutral-100: oklch(0.9 0.01 20); /* #E0E1DD */
 }
+
+
+@plugin "daisyui";
