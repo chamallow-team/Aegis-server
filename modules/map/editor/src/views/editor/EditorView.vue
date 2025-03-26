@@ -3,9 +3,7 @@
     <EditorNavbar />
     <div class="overflow-hidden m-2 rounded-xl bg-primary-100 w-full flex flex-row items-start justify-between">
       <router-view name="body"></router-view>
-      <router-view name="right">
-        <RightSide>Test</RightSide>
-      </router-view>
+      <router-view name="right"></router-view>
     </div>
   </div>
 </template>
