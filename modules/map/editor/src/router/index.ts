@@ -15,7 +15,7 @@ const router = createRouter({
       children: [
         {
           path: 'entites',
-          name: 'editor_entities',
+          name: 'entities_editor',
           components: {
             body: () => import('@/views/editor/EntitiesView.vue')
           }

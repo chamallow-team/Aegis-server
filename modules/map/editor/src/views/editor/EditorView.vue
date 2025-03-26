@@ -1,6 +1,9 @@
 <template>
-  <div>
+  <div class="flex flex-row h-screen w-screen bg-primary-200/25">
     <EditorNavbar />
+    <div class="overflow-hidden m-2 rounded-xl bg-primary-100 w-full">
+      <router-view name="body"></router-view>
+    </div>
   </div>
 </template>
 
