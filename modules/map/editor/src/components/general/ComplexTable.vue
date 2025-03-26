@@ -10,7 +10,7 @@
       <tbody class="h-full overflow-y-scroll">
       <tr v-for="(row, index) in data" :key="index" class="cursor-pointer"
           :class="selectedItem === row ? 'bg-primary-200/40' : 'hover:bg-primary-200/50'"
-          @click="itemSelected(row, index)">
+          @click="itemSelected(row)">
         <th v-if="show_index">{{ index + 1 }}</th>
         <td v-for="(head, hi) in headers" :key="hi">{{ row[head.field] }}</td>
       </tr>
@@ -47,7 +47,7 @@ const {
 
 const emit = defineEmits(['select'])
 
-function itemSelected(row: any, index: number) {
+function itemSelected(row: any) {
   if (!allowSelection) return
   emit('select', row)
 }
