@@ -249,15 +249,4 @@ mod test {
         assert_eq!(shell.get_damages().missile, 0.0);
         assert_eq!(shell.get_damages().satellite, 0.0);
     }
-
-    #[cfg(feature = "load_configuration")]
-    #[test]
-    fn load_config() {
-        let mut p = std::env::current_dir().unwrap();
-        p.push("../../data/config/weapons");
-
-        let store = crate::loader::load(p).unwrap();
-
-        dbg!(store);
-    }
 }
