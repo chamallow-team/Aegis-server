@@ -17,4 +17,3 @@ This documentation will describe how a mod is intended to be defined and built.
 ### Research tree
 
 ### Maps
-
