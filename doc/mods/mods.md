@@ -73,6 +73,8 @@ Are contained the following data:
 }
 ```
 
+[Generated using: https://www.text-2-tree.com/]:#
+
 _This is an example file for a hypothetical mod called "French air force"._
 
 ### Mod ID
