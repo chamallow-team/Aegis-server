@@ -10,7 +10,7 @@ members = [
     "utils/logs",
     "utils/save",
     "server"
-]
+, "modules/pack"]
 resolver = "1"
 
 [workspace.dependencies]
