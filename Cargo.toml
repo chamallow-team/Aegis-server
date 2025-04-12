@@ -10,7 +10,7 @@ members = [
     "utils/logs",
     "utils/save",
     "server"
-, "modules/pack"]
+    , "modules/pack"]
 resolver = "1"
 
 [workspace.dependencies]
@@ -22,7 +22,7 @@ hashbrown = "0.14.3"
 rand = "0.8.5"
 bitflags = "2.4.2"
 reqwest = "0.12.5"
-regex = "1.10.3"
+regex = "1.11.1"
 
 smol = "2.0.0"
 
@@ -39,8 +39,11 @@ bevy = "0.14.0"
 bevy_mod_outline = "0.8.1"
 
 anyhow = "1.0.86"
-thiserror = "1.0.63"
+thiserror = "2.0.12"
 
 fastnoise-lite = "1.1.1"
 
 semver = "1.0.26"
+zip = "2.6.1"
+
+lazy_static = "1.5.0"

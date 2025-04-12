@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+serde = { workspace = true, features = ["derive"] }
+rmp-serde = { workspace = true }
+semver = { workspace = true, features = ["serde"] }
+regex = { workspace = true, features = ["unicode"] }
+lazy_static = { workspace = true }
+thiserror = { workspace = true }
+zip = { workspace = true, features = ["default", "flate2", "deflate-flate2"] }
