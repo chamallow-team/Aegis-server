@@ -5,10 +5,7 @@ members = [
     "modules/diplomacy",
     "modules/map",
     "modules/market",
-    "modules/resources",
     "modules/technology_tree",
-    "modules/units",
-    "modules/weapons",
     "utils/auth",
     "utils/logs",
     "utils/save",
@@ -45,3 +42,5 @@ anyhow = "1.0.86"
 thiserror = "1.0.63"
 
 fastnoise-lite = "1.1.1"
+
+semver = "1.0.26"
